@@ -3,6 +3,7 @@ package com.grupo7.dsi.tpai.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -54,7 +55,7 @@ public class EventoSismico {
     })
     private List<CambioEstado> cambiosEstado;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumns({
             @JoinColumn(name = "origen_generacion", referencedColumnName = "origenGeneracion"),
             @JoinColumn(name = "fecha_hora_ocurrencia", referencedColumnName = "fechaHoraOcurrencia")
@@ -226,5 +227,19 @@ public class EventoSismico {
         CambioEstado cambioEstadoBloqueadoEnRevision = new CambioEstado(estadoBloqueado);
         this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
         this.estadoActual = estadoBloqueado;
+    }
+
+    public List<String> buscarDatosEventoSismico() {
+        List<String> datos = new ArrayList<>();
+
+        datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());
+
+        datos.add("Clasificación: " + clasificacion.getNombre() + " (" +
+                clasificacion.getKmProfundidadDesde() + "km - " +
+                clasificacion.getKmProfundidadHasta() + "km)");
+
+        datos.add("Origen: " + origenGeneracion.getNombre() + " - " + origenGeneracion.getDescripcion());
+
+        return datos;
     }
 }

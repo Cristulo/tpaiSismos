@@ -1,10 +1,11 @@
 package com.grupo7.dsi.tpai.controllers;
 
 import com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual;
-import com.grupo7.dsi.tpai.models.Estado;
-import com.grupo7.dsi.tpai.models.EventoSismico;
+import com.grupo7.dsi.tpai.dto.DetalleEventoSismicoDTO;
+import com.grupo7.dsi.tpai.models.*;
 import com.grupo7.dsi.tpai.service.EstadoService;
 import com.grupo7.dsi.tpai.service.EventoSismicoService;
+import com.grupo7.dsi.tpai.service.SismografoService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -17,15 +18,20 @@ import java.util.stream.Collectors;
 @Component
 public class RegistrarRevisionManualController {
 
+
     @Autowired
     private EventoSismicoService eventoSismicoService;
     private List<EventoSismico> eventosBDD;
     @Autowired
     private EstadoService estadoService;
     private List<Estado> estadosBDD;
+    @Autowired
+    private SismografoService sismografoService;
+    private List<Sismografo> sismografosBDD;
 
     @Autowired @Lazy
     private PantallaRegistrarRevisionManual pantalla;
+    private GenerarSismogramaController generarSismogramaController;
 
     private EventoSismico eventoSismicoSeleccionado;
 
@@ -33,6 +39,8 @@ public class RegistrarRevisionManualController {
     private void init() {
         this.eventosBDD = eventoSismicoService.findAll();
         this.estadosBDD = estadoService.findAll();
+        this.sismografosBDD = sismografoService.findAll();
+        this.generarSismogramaController = new GenerarSismogramaController();
     }
 
     public void registrarResultadoDeRevisionManual() {
@@ -101,30 +109,93 @@ public class RegistrarRevisionManualController {
 
     private void buscarDatosEventoSismicoSeleccionado() {
         if (eventoSismicoSeleccionado == null) {
-            pantalla.mostrarDatosEventoSismicoSeleccionado(Collections.emptyList()); // no hay evento seleccionado
+            pantalla.mostrarDatosEventoSismicoSeleccionado(null);
+            return;
         }
 
-        List<String> datos = new ArrayList<>();
-        datos.add("fechaHoraOcurrencia:" + eventoSismicoSeleccionado.getFechaHoraOcurrencia());
-        datos.add("origenGeneracion:"     + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
-        datos.add("fechaHoraFin:"         + Optional.ofNullable(eventoSismicoSeleccionado.getFechaHoraFin()).orElse(null));
-        datos.add("latitudEpicentro:"     + eventoSismicoSeleccionado.getLatitudEpicentro());
-        datos.add("longitudEpicentro:"    + eventoSismicoSeleccionado.getLongitudEpicentro());
-        datos.add("latitudHipocentro:"    + eventoSismicoSeleccionado.getLatitudHipocentro());
-        datos.add("longitudHipocentro:"   + eventoSismicoSeleccionado.getLongitudHipocentro());
-        datos.add("valorMagnitud:"        + eventoSismicoSeleccionado.getValorMagnitud());
-        datos.add("magnitudRichter:"      + eventoSismicoSeleccionado.getMagnitud().getNumero());
-        datos.add("clasificacionSismo:"   + eventoSismicoSeleccionado.getClasificacion().getNombre());
-        datos.add("alcanceSismo:"         + eventoSismicoSeleccionado.getAlcanceSismo().getNombre());
-        datos.add("estadoActual:"         + eventoSismicoSeleccionado.getEstadoActual().getNombre());
-        if (eventoSismicoSeleccionado.getAnalistaSupervisor() != null) {
-            datos.add("analistaSupervisor:"
-                    + eventoSismicoSeleccionado.getAnalistaSupervisor().getNombre()
-                    + " (Legajo " + eventoSismicoSeleccionado.getAnalistaSupervisor().getId() + ")");
-        } else {
-            datos.add("analistaSupervisor:N/A");
-        }
+        DetalleEventoSismicoDTO dto = new DetalleEventoSismicoDTO();
 
-        pantalla.mostrarDatosEventoSismicoSeleccionado(datos);
+        // Datos principales
+        List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismico();
+        dto.setDatosPrincipales(alcanceClasificacionOrigen);
+
+        // Clasificar series
+        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales();
+        Map<String, List<String>> seriesPorEstacion = new HashMap<>();
+
+        for (Map.Entry<EstacionSismologica, List<SerieTemporal>> entry : seriesClasificadas.entrySet()) {
+            String nombreEstacion = entry.getKey().getNombre();
+            List<SerieTemporal> series = entry.getValue();
+            List<String> seriesStr = new ArrayList<>();
+
+            if (series == null || series.isEmpty()) {
+                seriesStr.add("⚠️ No hay series temporales registradas para esta estación.");
+            } else {
+                for (SerieTemporal serie : series) {
+                    String estadoAlarma = (serie.getCondicionAlarma() != null && serie.getCondicionAlarma()) ? "Activada" : "Desactivada";
+
+                    String encabezado = "⏱ Tiempo: " + serie.getFechaHoraRegistro() +
+                            " | 🔔 Alarma: " + estadoAlarma +
+                            " | 📶 Frecuencia: " + serie.getFrecuenciaMuestreo();
+                    seriesStr.add(encabezado);
+
+                    if (serie.getMuestrasSismicas() != null && !serie.getMuestrasSismicas().isEmpty()) {
+                        for (MuestraSismica muestra : serie.getMuestrasSismicas()) {
+                            String lineaMuestra = "    ↳ Muestra @ " + muestra.getFechaHoraMuestra();
+                            seriesStr.add(lineaMuestra);
+
+                            if (muestra.getDetallesMuestraSismica() != null && !muestra.getDetallesMuestraSismica().isEmpty()) {
+                                for (DetalleMuestraSismica detalle : muestra.getDetallesMuestraSismica()) {
+                                    String lineaDetalle = "        • Valor: " + detalle.getValor();
+                                    seriesStr.add(lineaDetalle);
+                                }
+                            } else {
+                                seriesStr.add("        • Sin detalles de muestra");
+                            }
+                        }
+                    } else {
+                        seriesStr.add("    • No hay muestras asociadas");
+                    }
+
+                    seriesStr.add(""); // Separador visual entre series
+                }
+            }
+
+            seriesPorEstacion.put(nombreEstacion, seriesStr);
+        }
+        dto.setSeriesTemporalesPorEstacion(seriesPorEstacion);
+
+        // Códigos de sismogramas
+        List<String> codigos = generarSismogramaController
+                .generarSismograma(new ArrayList<>(seriesClasificadas.keySet()));
+        dto.setCodigosSismograma(codigos);
+
+        // Mostrar datos en la pantalla
+        pantalla.mostrarDatosEventoSismicoSeleccionado(dto);
     }
+
+    public Map<EstacionSismologica, List<SerieTemporal>> clasificarSeriesTemporales() {
+        Map<EstacionSismologica, List<SerieTemporal>> seriesTemporalesClasificadas = new HashMap<>();
+
+        List<SerieTemporal> seriesEvento = eventoSismicoSeleccionado.getSerieTemporal();
+
+        for (Sismografo sismografo : sismografosBDD) {
+            EstacionSismologica estacionSismologica = sismografo.getEstacionSismologica();
+            List<SerieTemporal> coincidentes = new ArrayList<>();
+
+            for (SerieTemporal serieEvento : seriesEvento) {
+                if (sismografo.getSeriesTemporales().contains(serieEvento)) {
+                    coincidentes.add(serieEvento);
+                }
+            }
+
+            if (!coincidentes.isEmpty()) {
+                seriesTemporalesClasificadas.put(estacionSismologica, coincidentes);
+            }
+        }
+
+        return seriesTemporalesClasificadas;
+    }
+
+
 }

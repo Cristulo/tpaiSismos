@@ -1,7 +1,9 @@
 package com.grupo7.dsi.tpai.boundaries;
 
-import com.grupo7.dsi.tpai.boundaries.utils.EventoSismicoDTO;
+import com.grupo7.dsi.tpai.dto.DetalleEventoSismicoDTO;
+import com.grupo7.dsi.tpai.dto.EventoSismicoTablaDTO;
 import com.grupo7.dsi.tpai.controllers.RegistrarRevisionManualController;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,7 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,27 +34,16 @@ public class PantallaRegistrarRevisionManual implements Initializable {
     @FXML private AnchorPane rootPane;  // Contenedor base definido en VistaRegistrarRevisionManual.fxml
 
     // ↓ Estos se inyectan al cargar la tabla ↓
-    @FXML private TableView<EventoSismicoDTO> tablaEventos;
-    @FXML private TableColumn<EventoSismicoDTO, Boolean> colSeleccionar;
-    @FXML private TableColumn<EventoSismicoDTO, String>  colFechaHora;
-    @FXML private TableColumn<EventoSismicoDTO, String>  colMagnitud;
-    @FXML private TableColumn<EventoSismicoDTO, String>  colLugarOrigen;
+    @FXML private TableView<EventoSismicoTablaDTO> tablaEventos;
+    @FXML private TableColumn<EventoSismicoTablaDTO, Boolean> colSeleccionar;
+    @FXML private TableColumn<EventoSismicoTablaDTO, String>  colFechaHora;
+    @FXML private TableColumn<EventoSismicoTablaDTO, String>  colMagnitud;
+    @FXML private TableColumn<EventoSismicoTablaDTO, String>  colLugarOrigen;
 
-    // ↓ Estos se inyectan al cargar el detalle ↓
-    @FXML private Label lblFechaHoraOcurrencia;
-    @FXML private Label lblOrigenGeneracion;
-    @FXML private Label lblFechaHoraFin;
-    @FXML private Label lblLatitudEpicentro;
-    @FXML private Label lblLongitudEpicentro;
-    @FXML private Label lblLatitudHipocentro;
-    @FXML private Label lblLongitudHipocentro;
-    @FXML private Label lblValorMagnitud;
-    @FXML private Label lblMagnitudRichter;
-    @FXML private Label lblClasificacionSismo;
-    @FXML private Label lblAlcanceSismo;
-    @FXML private Label lblEstadoActual;
-    @FXML private Label lblAnalistaSupervisor;
-    // …más Labels según tus campos de detalle…
+    // Estos se inyectan al cargar el detalle
+    @FXML private ListView<String> listDatosPrincipales;
+    @FXML private VBox boxSeriesPorEstacion;
+    @FXML private ListView<String> listCodigosSismograma;
 
     private Stage stage;
 
@@ -111,10 +102,10 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             colLugarOrigen.setCellValueFactory(c -> c.getValue().lugarOrigenProperty());
 
             // 3) llena con datos
-            ObservableList<EventoSismicoDTO> data = FXCollections.observableArrayList(
+            ObservableList<EventoSismicoTablaDTO> data = FXCollections.observableArrayList(
                     raws.stream().map(l -> {
                         String[] p = l.split(",", -1);
-                        return new EventoSismicoDTO(
+                        return new EventoSismicoTablaDTO(
                                 p.length>0?p[0]:"",
                                 p.length>1?p[1]:"",
                                 p.length>2?p[2]:"",
@@ -140,8 +131,8 @@ public class PantallaRegistrarRevisionManual implements Initializable {
 
     @FXML
     private void tomarSeleccionEventoSismico() {
-        EventoSismicoDTO sel = tablaEventos.getItems().stream()
-                .filter(EventoSismicoDTO::isSeleccionado)
+        EventoSismicoTablaDTO sel = tablaEventos.getItems().stream()
+                .filter(EventoSismicoTablaDTO::isSeleccionado)
                 .findFirst().orElse(null);
 
         if (sel == null) {
@@ -155,12 +146,16 @@ public class PantallaRegistrarRevisionManual implements Initializable {
         );
     }
 
-    public void mostrarDatosEventoSismicoSeleccionado(List<String> datos) {
+    public void mostrarDatosEventoSismicoSeleccionado(DetalleEventoSismicoDTO dto) {
+        if (dto == null) {
+            new Alert(Alert.AlertType.WARNING, "No hay evento sísmico seleccionado.").showAndWait();
+            return;
+        }
+
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/views/VistaRegistrarRevisionManualDetalleES.fxml")
-            );
-            loader.setControllerFactory(cls -> this);
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/views/VistaRegistrarRevisionManualDetalleES.fxml")); // ✅ acá estaba el problema
+            loader.setControllerFactory(cls -> this); // mantenemos el mismo controller
             AnchorPane detalleView = loader.load();
 
             rootPane.getChildren().setAll(detalleView);
@@ -169,32 +164,27 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             AnchorPane.setLeftAnchor(detalleView, 0.0);
             AnchorPane.setRightAnchor(detalleView, 0.0);
 
-            // Esperar a que se inyecten los @FXML antes de usarlos
-            javafx.application.Platform.runLater(() -> {
-                datos.forEach(line -> {
-                    String[] kv = line.split(":", 2);
-                    if (kv.length < 2) return;
+            Platform.runLater(() -> {
+                listDatosPrincipales.getItems().setAll(dto.getDatosPrincipales());
 
-                    switch (kv[0]) {
-                        case "fechaHoraOcurrencia":     lblFechaHoraOcurrencia.setText(kv[1]); break;
-                        case "origenGeneracion":        lblOrigenGeneracion.setText(kv[1]); break;
-                        case "fechaHoraFin":            lblFechaHoraFin.setText(kv[1]); break;
-                        case "latitudEpicentro":        lblLatitudEpicentro.setText(kv[1]); break;
-                        case "longitudEpicentro":       lblLongitudEpicentro.setText(kv[1]); break;
-                        case "latitudHipocentro":       lblLatitudHipocentro.setText(kv[1]); break;
-                        case "longitudHipocentro":      lblLongitudHipocentro.setText(kv[1]); break;
-                        case "valorMagnitud":           lblValorMagnitud.setText(kv[1]); break;
-                        case "magnitudRichter":         lblMagnitudRichter.setText(kv[1]); break;
-                        case "clasificacionSismo":      lblClasificacionSismo.setText(kv[1]); break;
-                        case "alcanceSismo":            lblAlcanceSismo.setText(kv[1]); break;
-                        case "estadoActual":            lblEstadoActual.setText(kv[1]); break;
-                        case "analistaSupervisor":      lblAnalistaSupervisor.setText(kv[1]); break;
-                    }
+                boxSeriesPorEstacion.getChildren().clear();
+                dto.getSeriesTemporalesPorEstacion().forEach((estacion, series) -> {
+                    Label lblEstacion = new Label("Estación: " + estacion);
+                    VBox vboxSeries = new VBox(5);
+                    series.forEach(s -> vboxSeries.getChildren().add(new Label(" • " + s)));
+
+                    VBox seccion = new VBox(lblEstacion, vboxSeries);
+                    seccion.setSpacing(5);
+                    seccion.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 10; -fx-background-radius: 5;");
+                    boxSeriesPorEstacion.getChildren().add(seccion);
                 });
+
+                listCodigosSismograma.getItems().setAll(dto.getCodigosSismograma());
             });
 
         } catch (IOException ex) {
             ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Error al cargar la vista de detalle: " + ex.getMessage()).showAndWait();
         }
     }
 }
