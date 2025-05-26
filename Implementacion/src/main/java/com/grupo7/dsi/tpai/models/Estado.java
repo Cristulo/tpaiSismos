@@ -50,4 +50,11 @@ public class Estado {
         }
         return false;
     }
+
+    public Boolean sosRechazado(){
+        if (esNombre("Rechazado") && esAmbito("Evento sismico")) {
+            return true;
+        }
+        return false;
+    }
 }

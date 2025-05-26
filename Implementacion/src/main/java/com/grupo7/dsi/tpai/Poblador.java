@@ -31,8 +31,10 @@ public class Poblador implements CommandLineRunner {
     @Autowired private SismografoService sismografoService;
     @Autowired private SerieTemporalService serieTemporalService;
     @Autowired private MuestraSismicaService muestraSismicaService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         // Arranca un contexto Spring ligero SOLO con Poblador
         SpringApplication.run(Poblador.class, args).close();
     }
@@ -118,6 +120,7 @@ public class Poblador implements CommandLineRunner {
             estacion.setFechaSolicitudCertificacion(LocalDate.of(2022, 5, 10));
             estacion.setNroCertificacionAdquisicion(101);
             estacion = estacionSismologicaService.save(estacion); // asumimos que tenés este service
+
 
 
             // Alcance
@@ -411,8 +414,6 @@ public class Poblador implements CommandLineRunner {
                     nuevaSerie.setMuestrasSismicas(muestrasNuevas);
 
                     sismografo.getSeriesTemporales().add(nuevaSerie);
-
-
             }
 
             // Asignar series del sismógrafo al evento1
@@ -422,6 +423,10 @@ public class Poblador implements CommandLineRunner {
 
             sismografoService.save(sismografo);
 
+            Usuario usuario = new Usuario();
+            usuario.setEmpleado(empleado);
+            usuario.setNombreUsuario("Cristulo");
+            usuarioService.save(usuario);
 
         };
     }

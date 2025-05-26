@@ -6,6 +6,7 @@ import com.grupo7.dsi.tpai.models.*;
 import com.grupo7.dsi.tpai.service.EstadoService;
 import com.grupo7.dsi.tpai.service.EventoSismicoService;
 import com.grupo7.dsi.tpai.service.SismografoService;
+import com.grupo7.dsi.tpai.service.UsuarioService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,10 +29,16 @@ public class RegistrarRevisionManualController {
     @Autowired
     private SismografoService sismografoService;
     private List<Sismografo> sismografosBDD;
+    @Autowired
+    private UsuarioService usuarioService;
+    private Usuario usuario;
 
     @Autowired @Lazy
     private PantallaRegistrarRevisionManual pantalla;
     private GenerarSismogramaController generarSismogramaController;
+
+
+    private Sesion sesion;
 
     private EventoSismico eventoSismicoSeleccionado;
 
@@ -40,6 +47,8 @@ public class RegistrarRevisionManualController {
         this.eventosBDD = eventoSismicoService.findAll();
         this.estadosBDD = estadoService.findAll();
         this.sismografosBDD = sismografoService.findAll();
+        this.usuario = usuarioService.findByNombreUsuario("Cristulo");
+        this.sesion = new Sesion(usuario);
         this.generarSismogramaController = new GenerarSismogramaController();
     }
 
@@ -116,11 +125,11 @@ public class RegistrarRevisionManualController {
         DetalleEventoSismicoDTO dto = new DetalleEventoSismicoDTO();
 
         // Datos principales
-        List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismico();
+        List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismico(); //CU
         dto.setDatosPrincipales(alcanceClasificacionOrigen);
 
         // Clasificar series
-        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales();
+        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales(); //CU
         Map<String, List<String>> seriesPorEstacion = new HashMap<>();
 
         for (Map.Entry<EstacionSismologica, List<SerieTemporal>> entry : seriesClasificadas.entrySet()) {
@@ -166,8 +175,8 @@ public class RegistrarRevisionManualController {
         dto.setSeriesTemporalesPorEstacion(seriesPorEstacion);
 
         // Códigos de sismogramas
-        List<String> codigos = generarSismogramaController
-                .generarSismograma(new ArrayList<>(seriesClasificadas.keySet()));
+        List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesClasificadas.keySet())); //CU
+
         dto.setCodigosSismograma(codigos);
 
         // Mostrar datos en la pantalla
@@ -195,6 +204,57 @@ public class RegistrarRevisionManualController {
         }
 
         return seriesTemporalesClasificadas;
+    }
+
+    public void modificarDatosEventoSismico(){
+        List<String> datosDisponibles = buscarDatosParaModificar();
+        pantalla.solicitarModificacionDeDatos(datosDisponibles);
+    }
+
+    private List<String> buscarDatosParaModificar(){
+        List<String> datosDisponibles = new ArrayList<>();
+        // Datos actuales de la  magnitud
+        datosDisponibles.add("Magnitud: " + eventoSismicoSeleccionado.getMagnitud().getNumero() + " " + eventoSismicoSeleccionado.getMagnitud().getDescripcionMagnitud());
+        // Datos actuales del alcance
+        datosDisponibles.add("Alcance: " + eventoSismicoSeleccionado.getAlcanceSismo().getNombre() + " - " + eventoSismicoSeleccionado.getAlcanceSismo().getDescripcion());
+        // Datos actuales del origen de generación
+        datosDisponibles.add("Origen de generación: " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getDescripcion());
+        return datosDisponibles;
+    }
+
+    public void continuarSinModificarDatos(){
+        pantalla.solicitarAccionFinalRevision();
+    }
+
+    public void tomarSeleccionRechazarEvento(){
+        validarEventoSismicoSeleccionado();
+        actualizarEstadoEventoSismicoRechazado();
+
+    }
+
+    private void validarEventoSismicoSeleccionado(){
+        System.out.println("Validando evento sísmico seleccionado..."); // Esto no entendi que tiene que hacer
+    }
+
+    private void actualizarEstadoEventoSismicoRechazado(){
+        Estado estadoRechazado = estadosBDD.stream()
+                .filter(estado -> estado.sosRechazado())
+                .findFirst()
+                .orElse(null);
+
+        // Buscar el empleado que está realizando la revisión
+        Empleado empleado = sesion.getUsuario().getEmpleado();
+        eventoSismicoSeleccionado.rechazarEventoSismico(estadoRechazado, empleado);
+        finCu();
+    }
+
+    private void finCu(){
+        // Mostrar todos los datos del evento sismico por terminal
+        System.out.println("Evento sísmico rechazado: " + eventoSismicoSeleccionado.getFechaHoraOcurrencia() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
+        System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getNombre());
+        System.out.println("Responsable de la revisión: " + eventoSismicoSeleccionado.getCambiosEstado().get(eventoSismicoSeleccionado.getCambiosEstado().size() - 1).getResponsableInspeccion().getNombre());
+        pantalla.cerrarVentana();
+
     }
 
 

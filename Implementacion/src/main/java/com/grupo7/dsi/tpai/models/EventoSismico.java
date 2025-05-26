@@ -242,4 +242,25 @@ public class EventoSismico {
 
         return datos;
     }
+
+    public void rechazarEventoSismico(Estado estadoRechazado, Empleado responsableInspeccion) {
+        // Validar que el estadoRechazado no sea null
+        if (estadoRechazado == null) {
+            throw new IllegalArgumentException("El estadoRechazado no puede ser null, revise la base de datos");
+        }
+
+        // Setear fin del estado actual
+        for (CambioEstado cambioEstado : cambiosEstado) {
+            if (cambioEstado.esEstadoActual()){
+                cambioEstado.setFechaHoraFin(LocalDateTime.now());
+                break;
+            }
+        }
+
+        // Crear nuevo cambio de estado
+        CambioEstado cambioEstadoRechazado = new CambioEstado(estadoRechazado);
+        cambioEstadoRechazado.setResponsableInspeccion(responsableInspeccion);
+        this.cambiosEstado.add(cambioEstadoRechazado);
+        this.estadoActual = estadoRechazado;
+    }
 }

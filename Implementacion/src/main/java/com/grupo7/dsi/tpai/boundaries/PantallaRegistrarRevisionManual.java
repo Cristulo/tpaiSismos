@@ -45,6 +45,13 @@ public class PantallaRegistrarRevisionManual implements Initializable {
     @FXML private VBox boxSeriesPorEstacion;
     @FXML private ListView<String> listCodigosSismograma;
 
+    @FXML private TextField txtMagnitudNumero;
+    @FXML private TextField txtMagnitudDescripcion;
+    @FXML private TextField txtAlcanceNombre;
+    @FXML private TextField txtAlcanceDescripcion;
+    @FXML private TextField txtOrigenNombre;
+    @FXML private TextField txtOrigenDescripcion;
+
     private Stage stage;
 
     @Override
@@ -187,4 +194,120 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             new Alert(Alert.AlertType.ERROR, "Error al cargar la vista de detalle: " + ex.getMessage()).showAndWait();
         }
     }
+
+    @FXML
+    private void handleCerrarDetalleEvento() {
+        solicitarVisualizacionMapa();
+    }
+
+    private void solicitarVisualizacionMapa() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Desea ver el mapa del evento sísmico?",
+                ButtonType.YES, ButtonType.NO);
+        alert.setHeaderText(null);
+        alert.setTitle("Visualización de Mapa");
+
+        alert.showAndWait().ifPresent(response -> {
+            tomarSeleccionVisualizacionMapa(response == ButtonType.YES);
+        });
+    }
+
+    private void tomarSeleccionVisualizacionMapa(boolean verMapa) {
+        if (verMapa) {
+            cargarVista("/views/VistaRegistrarRevisionManualMapa.fxml");
+        } else {
+            // Cerrar la vista
+            gestor.modificarDatosEventoSismico(); //
+        }
+    }
+
+    public void cargarVista(String rutaFXML) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
+            loader.setControllerFactory(cls -> this); // Si el controlador actual contiene la lógica
+            AnchorPane nuevaVista = loader.load();
+
+            rootPane.getChildren().setAll(nuevaVista);
+            AnchorPane.setTopAnchor(nuevaVista, 0.0);
+            AnchorPane.setBottomAnchor(nuevaVista, 0.0);
+            AnchorPane.setLeftAnchor(nuevaVista, 0.0);
+            AnchorPane.setRightAnchor(nuevaVista, 0.0);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Error al cargar la vista: " + rutaFXML).showAndWait();
+        }
+    }
+
+    public void solicitarModificacionDeDatos(List<String> datosActuales) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/VistaRegistrarRevisionManualModificacionES.fxml"));
+            loader.setControllerFactory(cls -> this);
+            AnchorPane vista = loader.load();
+
+            rootPane.getChildren().setAll(vista);
+            AnchorPane.setTopAnchor(vista, 0.0);
+            AnchorPane.setBottomAnchor(vista, 0.0);
+            AnchorPane.setLeftAnchor(vista, 0.0);
+            AnchorPane.setRightAnchor(vista, 0.0);
+
+            // Cargar los datos actuales desglosando cada línea
+            if (datosActuales.size() >= 3) {
+                // Magnitud: 5.6 Moderado
+                String[] magnitud = datosActuales.get(0).replace("Magnitud: ", "").split(" ", 2);
+                txtMagnitudNumero.setText(magnitud[0]);
+                txtMagnitudDescripcion.setText(magnitud.length > 1 ? magnitud[1] : "");
+
+                // Alcance: Local - Se sintió en zona urbana
+                String[] alcance = datosActuales.get(1).replace("Alcance: ", "").split(" - ", 2);
+                txtAlcanceNombre.setText(alcance[0]);
+                txtAlcanceDescripcion.setText(alcance.length > 1 ? alcance[1] : "");
+
+                // Origen de generación: Tectónico - Movimiento de placas
+                String[] origen = datosActuales.get(2).replace("Origen de generación: ", "").split(" - ", 2);
+                txtOrigenNombre.setText(origen[0]);
+                txtOrigenDescripcion.setText(origen.length > 1 ? origen[1] : "");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "No se pudo cargar el formulario de modificación.").showAndWait();
+        }
+    }
+
+    @FXML
+    private void tomarSeleccionModificacionDeDatos(){
+        // No se modificaron los datos, continua el caso de uso
+        gestor.continuarSinModificarDatos();
+    }
+
+    public void solicitarAccionFinalRevision() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Acción Final");
+        alert.setHeaderText("¿Qué desea hacer con el evento sísmico?");
+        alert.setContentText("Elegí una acción final:");
+
+        ButtonType btnConfirmar = new ButtonType("✅ Confirmar");
+        ButtonType btnRechazar = new ButtonType("❌ Rechazar");
+        ButtonType btnRevisarExperto = new ButtonType("Solicitar a experto");
+
+        alert.getButtonTypes().setAll(btnConfirmar, btnRechazar, btnRevisarExperto);
+
+                alert.showAndWait().ifPresent(respuesta -> {
+                    if (respuesta == btnConfirmar) {
+                        // Lógica para confirmar el evento sísmico
+                    } else if (respuesta == btnRechazar) {
+                        gestor.tomarSeleccionRechazarEvento();
+                    } else if (respuesta == btnRevisarExperto) {
+                // Lógica para solicitar revisión a un experto
+            }
+        });
+    }
+
+    public void cerrarVentana(){
+        // Cierra la ventana de registro de revisión manual
+        if (stage != null) {
+            stage.close();
+        }
+    }
+
 }
