@@ -418,7 +418,7 @@ public class Poblador implements CommandLineRunner {
 
             // Asignar series del sismógrafo al evento1
             List<SerieTemporal> seriesParaEvento = new ArrayList<>(sismografo.getSeriesTemporales());
-            evento1.setSerieTemporal(seriesParaEvento);
+            evento1.setSeriesTemporal(seriesParaEvento);
             eventoSismicoService.save(evento1);
 
             sismografoService.save(sismografo);

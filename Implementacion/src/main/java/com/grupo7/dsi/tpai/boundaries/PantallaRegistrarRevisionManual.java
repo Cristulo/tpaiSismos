@@ -213,6 +213,7 @@ public class PantallaRegistrarRevisionManual implements Initializable {
 
     private void tomarSeleccionVisualizacionMapa(boolean verMapa) {
         if (verMapa) {
+            // Cargar la vista del mapa (un caso alternativo)
             cargarVista("/views/VistaRegistrarRevisionManualMapa.fxml");
         } else {
             // Cerrar la vista
@@ -220,6 +221,7 @@ public class PantallaRegistrarRevisionManual implements Initializable {
         }
     }
 
+    // Caso alternativo del CU no contemplado en el diagrama de secuencia
     public void cargarVista(String rutaFXML) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
@@ -238,6 +240,7 @@ public class PantallaRegistrarRevisionManual implements Initializable {
         }
     }
 
+    // Abre la vista para modificar los datos del evento sísmico seleccionado y permite al usuario continuar con o sin modificaciones.
     public void solicitarModificacionDeDatos(List<String> datosActuales) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/VistaRegistrarRevisionManualModificacionES.fxml"));

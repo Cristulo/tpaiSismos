@@ -53,7 +53,7 @@
         <HBox spacing="15" alignment="center">
             <Button text="Guardar cambios"
                     style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-            <Button text="Cancelar" onAction="#tomarSeleccionModificacionDeDatos"
+            <Button text="Continuar sin modificar" onAction="#tomarSeleccionModificacionDeDatos"
                     style="-fx-background-color: #e0e0e0; -fx-text-fill: black;"/>
         </HBox>
 

@@ -45,7 +45,7 @@ public class Estado {
     }
 
     public Boolean sosBloqueadoEnRevision() {
-        if (esNombre("Bloqueado en revision") && esAmbito("Evento sismico")) {
+        if (esAmbito("Evento sismico") && esNombre("Bloqueado en revision")) {
             return true;
         }
         return false;

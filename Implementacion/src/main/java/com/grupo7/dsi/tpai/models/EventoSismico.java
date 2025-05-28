@@ -60,11 +60,11 @@ public class EventoSismico {
             @JoinColumn(name = "origen_generacion", referencedColumnName = "origenGeneracion"),
             @JoinColumn(name = "fecha_hora_ocurrencia", referencedColumnName = "fechaHoraOcurrencia")
     })
-    private List<SerieTemporal> serieTemporal;
+    private List<SerieTemporal> seriesTemporal;
 
     public EventoSismico() {}
 
-    public EventoSismico(LocalDateTime fechaHoraFin, LocalDateTime fechaHoraOcurrencia, String latitudEpicentro, String latitudHipocentro, String longitudEpicentro, String longitudHipocentro, Float valorMagnitud, ClasificacionSismo clasificacion, MagnitudRichter magnitud, OrigenDeGeneracion origenGeneracion, AlcanceSismo alcanceSismo, Estado estadoActual, Empleado analistaSupervisor, List<CambioEstado> cambiosEstado, List<SerieTemporal> serieTemporal) {
+    public EventoSismico(LocalDateTime fechaHoraFin, LocalDateTime fechaHoraOcurrencia, String latitudEpicentro, String latitudHipocentro, String longitudEpicentro, String longitudHipocentro, Float valorMagnitud, ClasificacionSismo clasificacion, MagnitudRichter magnitud, OrigenDeGeneracion origenGeneracion, AlcanceSismo alcanceSismo, Estado estadoActual, Empleado analistaSupervisor, List<CambioEstado> cambiosEstado, List<SerieTemporal> seriesTemporal) {
         this.fechaHoraFin = fechaHoraFin;
         this.fechaHoraOcurrencia = fechaHoraOcurrencia;
         this.latitudEpicentro = latitudEpicentro;
@@ -79,7 +79,7 @@ public class EventoSismico {
         this.estadoActual = estadoActual;
         this.analistaSupervisor = analistaSupervisor;
         this.cambiosEstado = cambiosEstado;
-        this.serieTemporal = serieTemporal;
+        this.seriesTemporal = seriesTemporal;
     }
 
     public LocalDateTime getFechaHoraOcurrencia() {
@@ -194,28 +194,28 @@ public class EventoSismico {
         this.cambiosEstado = cambiosEstado;
     }
 
-    public List<SerieTemporal> getSerieTemporal() {
-        return serieTemporal;
+    public List<SerieTemporal> getSeriesTemporal() {
+        return seriesTemporal;
     }
 
-    public void setSerieTemporal(List<SerieTemporal> serieTemporal) {
-        this.serieTemporal = serieTemporal;
+    public void setSeriesTemporal(List<SerieTemporal> serieTemporal) {
+        this.seriesTemporal = serieTemporal;
     }
 
     public Boolean estaPendienteRevision() {
-        if (estadoActual.esNombre("Pendiente revision") && estadoActual.esAmbito("Evento sismico")) {
+        if (estadoActual.esAmbito("Evento sismico") && estadoActual.esNombre("Pendiente revision")) {
             return true;
         }
         return false;
     }
 
-    public void cambioEstadoBloqueadoEnRevision(Estado estadoBloqueado) {
+    public void bloquearEnRevision(Estado estadoBloqueado) {
         // Validar que el estadoBloqueado no sea null
         if (estadoBloqueado == null) {
-            throw new IllegalArgumentException("El estadoBloqueado no puede ser null, revise la base de datos");
+            throw new IllegalArgumentException("El estadoBloqueado no puede ser null, revise si hay problemas con la base de datos");
         }
 
-        // Setear fin del estado actual
+        // Setear la fechaHoraFin del cambio de estado actual
         for (CambioEstado cambioEstado : cambiosEstado) {
             if (cambioEstado.esEstadoActual()){
                 cambioEstado.setFechaHoraFin(LocalDateTime.now());
@@ -223,13 +223,17 @@ public class EventoSismico {
             }
         }
 
-        // Crear nuevo cambio de estado
+        // Crear nuevo cambio de estado (Patron creador)
         CambioEstado cambioEstadoBloqueadoEnRevision = new CambioEstado(estadoBloqueado);
         this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
-        this.estadoActual = estadoBloqueado;
+
+        // Setear el estado actual del evento sismico
+        this.setEstadoActual(estadoBloqueado);
     }
 
-    public List<String> buscarDatosEventoSismico() {
+    // Devuelve una lista de Strings con los datos del Alcance, Clasificación y Origen del evento sísmico seleccionado.
+    public List<String> buscarDatosEventoSismicoSeleccionado() {
+
         List<String> datos = new ArrayList<>();
 
         datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());
