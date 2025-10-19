@@ -1,10 +1,8 @@
 package com.grupo7.dsi.tpai.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Entity
-@Data
 @IdClass(EstadoId.class)
 public class Estado {
 
@@ -20,6 +18,22 @@ public class Estado {
     public Estado(String nombre, String ambito) {
         this.nombre = nombre;
         this.ambito = ambito;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setAmbito(String ambito) {
+        this.ambito = ambito;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getAmbito() {
+        return ambito;
     }
 
     // No es cohesivo, agregar esEstadoEspecifico
