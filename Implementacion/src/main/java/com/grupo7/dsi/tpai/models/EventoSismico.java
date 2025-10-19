@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -202,31 +203,35 @@ public class EventoSismico {
         this.seriesTemporal = serieTemporal;
     }
 
-    public Boolean estaPendienteRevision() {
-        if (estadoActual.esAmbito("Evento sismico") && estadoActual.esNombre("Pendiente revision")) {
+    public Boolean sosPendienteDeRevision() {
+        if (this.estadoActual.sosPendienteDeRevision()) {
             return true;
         }
         return false;
     }
 
-    public void bloquearEnRevision(Estado estadoBloqueado) {
+    public Boolean sosAutoDetectado(){
+        if (this.estadoActual.sosAutoDetectado()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void bloquearEnRevision(Estado estadoBloqueado, LocalDateTime fechaHoraActual) {
         // Validar que el estadoBloqueado no sea null
         if (estadoBloqueado == null) {
             throw new IllegalArgumentException("El estadoBloqueado no puede ser null, revise si hay problemas con la base de datos");
         }
-
         // Setear la fechaHoraFin del cambio de estado actual
         for (CambioEstado cambioEstado : cambiosEstado) {
             if (cambioEstado.esEstadoActual()){
-                cambioEstado.setFechaHoraFin(LocalDateTime.now());
+                cambioEstado.setFechaHoraFin(fechaHoraActual);
                 break;
             }
         }
-
         // Crear nuevo cambio de estado (Patron creador)
         CambioEstado cambioEstadoBloqueadoEnRevision = new CambioEstado(estadoBloqueado);
         this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
-
         // Setear el estado actual del evento sismico
         this.setEstadoActual(estadoBloqueado);
     }

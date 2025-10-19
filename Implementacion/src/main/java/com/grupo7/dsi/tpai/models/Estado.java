@@ -45,6 +45,20 @@ public class Estado {
         return this.ambito.equals(ambito);
     }
 
+    public Boolean sosPendienteDeRevision() {
+        if (esAmbito("Evento sismico") && esNombre("Pendiente revision")) {
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean sosAutoDetectado(){
+        if (esAmbito("Evento sismico") && esNombre("Auto detectado")) {
+            return true;
+        }
+        return false;
+    }
+
     public Boolean sosBloqueadoEnRevision() {
         if (esAmbito("Evento sismico") && esNombre("Bloqueado en revision")) {
             return true;

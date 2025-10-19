@@ -14,19 +14,15 @@ public class DetalleEventoSismicoDTO {
     public List<String> getDatosPrincipales() {
         return datosPrincipales;
     }
-
     public void setDatosPrincipales(List<String> datosPrincipales) {
         this.datosPrincipales = datosPrincipales;
     }
-
     public Map<String, List<String>> getSeriesTemporalesPorEstacion() {
         return seriesTemporalesPorEstacion;
     }
-
     public void setSeriesTemporalesPorEstacion(Map<String, List<String>> seriesTemporalesPorEstacion) {
         this.seriesTemporalesPorEstacion = seriesTemporalesPorEstacion;
     }
-
     public List<String> getCodigosSismograma() {
         return codigosSismograma;
     }

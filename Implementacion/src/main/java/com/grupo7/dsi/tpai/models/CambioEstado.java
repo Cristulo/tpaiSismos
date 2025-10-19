@@ -98,11 +98,9 @@ public class CambioEstado {
     public List<MotivoFueraServicio> getMotivoFueraServicio() {
         return motivoFueraServicio;
     }
-
     public void setMotivoFueraServicio(List<MotivoFueraServicio> motivoFueraServicio) {
         this.motivoFueraServicio = motivoFueraServicio;
     }
-
     public Boolean esEstadoActual(){
         if (this.fechaHoraFin == null) {
             return true;

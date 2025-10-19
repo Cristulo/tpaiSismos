@@ -63,7 +63,7 @@ public class RegistrarRevisionManualController {
         List<EventoSismico> eventoSismicosPendientes = new ArrayList<>();
         // Recorrer la lista de eventos sísmicos y filtrar los que están pendientes de revisión
         for (EventoSismico evento : eventosBDD) {
-            if (evento.estaPendienteRevision()) {
+            if (evento.sosPendienteDeRevision() || evento.sosAutoDetectado()) {
                 eventoSismicosPendientes.add(evento);
             }
         }
@@ -71,18 +71,18 @@ public class RegistrarRevisionManualController {
         eventoSismicosPendientes = filtrarPorFechayHoraDeOcurrencia(eventoSismicosPendientes);
 
         // Formatear datos para la pantalla
-        List<String> raws = new ArrayList<>();
+        List<String> stringsEventoSismicoPendienteRevision = new ArrayList<>();
         for (EventoSismico evento : eventoSismicosPendientes) {
             // antes ponías clasificación en p[3], ahora repetimos origen:
             String raw = String.join(",",
                     evento.getFechaHoraOcurrencia().toString(),
                     evento.getOrigenGeneracion().getNombre(),
                     String.valueOf(evento.getMagnitud().getNumero()),
-                    evento.getOrigenGeneracion().getNombre()    // <-- aquí
+                    evento.getOrigenGeneracion().getNombre()
             );
-            raws.add(raw);
+            stringsEventoSismicoPendienteRevision.add(raw);
         }
-        return raws;
+        return stringsEventoSismicoPendienteRevision;
     }
 
     // Filtra los eventos sísmicos por fecha y hora de ocurrencia
@@ -112,14 +112,15 @@ public class RegistrarRevisionManualController {
 
     // Gestiona el bloqueo del evento sísmico en revisión
     private void bloquearEnRevisionEventoSismico() {
+
         // Buscar el estado "Bloqueado en revisión" de la base de datos
         Estado estadoBloqueado = estadosBDD.stream()
                 .filter(estado -> estado.sosBloqueadoEnRevision())
                 .findFirst()
                 .orElse(null);
-
         // Cambiar el estado del evento sísmico a "Bloqueado"
-        this.eventoSismicoSeleccionado.bloquearEnRevision(estadoBloqueado);
+        LocalDateTime fechaHoraActual = LocalDateTime.now();
+        this.eventoSismicoSeleccionado.bloquearEnRevision(estadoBloqueado, fechaHoraActual);
 
     }
 
@@ -130,11 +131,11 @@ public class RegistrarRevisionManualController {
             return;
         }
 
-        DetalleEventoSismicoDTO dto = new DetalleEventoSismicoDTO(); // Ayudita del chat para manejar los datos en la pantalla
+        DetalleEventoSismicoDTO detalleEventoSismicoDTO = new DetalleEventoSismicoDTO();
 
         // Datos principales
         List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismicoSeleccionado(); // Caso de uso
-        dto.setDatosPrincipales(alcanceClasificacionOrigen);
+        detalleEventoSismicoDTO.setDatosPrincipales(alcanceClasificacionOrigen);
 
         // Clasificar series
         Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales(); // Caso de uso
@@ -142,15 +143,15 @@ public class RegistrarRevisionManualController {
         // Formatear series temporales por estación para enviar a la pantalla (era mucha logica para diagramar en la secuencia)
         Map<String, List<String>> seriesPorEstacion = formatearSeriesTemporalesPorEstacion(seriesClasificadas);
 
-        dto.setSeriesTemporalesPorEstacion(seriesPorEstacion);
+        detalleEventoSismicoDTO.setSeriesTemporalesPorEstacion(seriesPorEstacion);
 
         // Imagenes del sismograma
         List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesClasificadas.keySet())); // Caso de uso
 
-        dto.setCodigosSismograma(codigos);
+        detalleEventoSismicoDTO.setCodigosSismograma(codigos);
 
         // Mostrar datos en la pantalla
-        pantalla.mostrarDatosEventoSismicoSeleccionado(dto);
+        pantalla.mostrarDatosEventoSismicoSeleccionado(detalleEventoSismicoDTO);
     }
 
 
