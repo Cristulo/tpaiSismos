@@ -130,24 +130,20 @@ public class RegistrarRevisionManualController {
             pantalla.mostrarDatosEventoSismicoSeleccionado(null);
             return;
         }
-
         DetalleEventoSismicoDTO detalleEventoSismicoDTO = new DetalleEventoSismicoDTO();
+        // Datos principales - cabecera - Alcance - Clasificación - Origen
+        detalleEventoSismicoDTO.setDatosPrincipales(this.eventoSismicoSeleccionado.getAlcanceClasificacionOrigen());
 
-        // Datos principales
-        List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismicoSeleccionado(); // Caso de uso
-        detalleEventoSismicoDTO.setDatosPrincipales(alcanceClasificacionOrigen);
+        // Series temporales clasificadas por estación sismológica
+        Map<EstacionSismologica, List<SerieTemporal>> seriesBDDxEstacion = clasificarSeriesTemporalesXEstacion();
+        Map<EstacionSismologica, List<SerieTemporal>> seriesEventoSismicoClasificadasEstacionSismologica =
+                eventoSismicoSeleccionado.getSeriesTemporalClasificadasPorEstacionSismologica(seriesBDDxEstacion);
 
-        // Clasificar series
-        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales(); // Caso de uso
+        detalleEventoSismicoDTO.setSeriesTemporalesPorEstacion(
+                formatearSeriesTemporalesPorEstacion(seriesEventoSismicoClasificadasEstacionSismologica));
 
-        // Formatear series temporales por estación para enviar a la pantalla (era mucha logica para diagramar en la secuencia)
-        Map<String, List<String>> seriesPorEstacion = formatearSeriesTemporalesPorEstacion(seriesClasificadas);
-
-        detalleEventoSismicoDTO.setSeriesTemporalesPorEstacion(seriesPorEstacion);
-
-        // Imagenes del sismograma
-        List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesClasificadas.keySet())); // Caso de uso
-
+        // Codigos del sismograma
+        List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesEventoSismicoClasificadasEstacionSismologica.keySet()));
         detalleEventoSismicoDTO.setCodigosSismograma(codigos);
 
         // Mostrar datos en la pantalla
@@ -155,43 +151,19 @@ public class RegistrarRevisionManualController {
     }
 
 
-    public Map<EstacionSismologica, List<SerieTemporal>> clasificarSeriesTemporales() {
-
-        Map<EstacionSismologica, List<SerieTemporal>> seriesTemporalesClasificadas = new HashMap<>();
-
-        List<SerieTemporal> seriesEvento = eventoSismicoSeleccionado.getSeriesTemporal();
-
-        // Loop sismografos
-        for (Sismografo sismografo : sismografosBDD) {
-
-            EstacionSismologica estacionSismologica = sismografo.getEstacionSismologica();
-
-            List<SerieTemporal> coincidentes = new ArrayList<>();
-
-            // Loop SerieTemporal del ESseleccionado
-            for (SerieTemporal serieEventoSismicoSeleccionado : seriesEvento) {
-                List<SerieTemporal> seriesTempralesSismografo = sismografo.getSeriesTemporales();
-
-                // Loop
-                for (SerieTemporal serieSismografo : seriesTempralesSismografo) {
-                    // Compara si la serie del evento sismico coincide con la del sismografo
-                    if (serieEventoSismicoSeleccionado.equals(serieSismografo)) {
-                        coincidentes.add(serieSismografo);
-                    }
-                }
-            }
-
-            if (!coincidentes.isEmpty()) {
-                seriesTemporalesClasificadas.put(estacionSismologica, coincidentes);
-            }
+    public Map<EstacionSismologica, List<SerieTemporal>> clasificarSeriesTemporalesXEstacion() {
+        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadasPorEstacionSismologica = new HashMap<>();
+        for (Sismografo sismografoBdd : sismografosBDD) {
+            // Por cada sismografo, obtener su estación sismológica y las series temporales y guardarlas en seriesClasificadasPorEstacionSismologica
+            EstacionSismologica estacion = sismografoBdd.getEstacionSismologica();
+            List<SerieTemporal> seriesTemporalesDelSismografo = sismografoBdd.getSeriesTemporales();
+            seriesClasificadasPorEstacionSismologica.put(estacion, seriesTemporalesDelSismografo);
         }
-
-        return seriesTemporalesClasificadas;
+        return seriesClasificadasPorEstacionSismologica;
     }
 
     private Map<String, List<String>> formatearSeriesTemporalesPorEstacion(Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas) {
         Map<String, List<String>> seriesPorEstacion = new HashMap<>();
-
         for (Map.Entry<EstacionSismologica, List<SerieTemporal>> entry : seriesClasificadas.entrySet()) {
             String nombreEstacion = entry.getKey().getNombre();
             List<SerieTemporal> series = entry.getValue();

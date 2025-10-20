@@ -1,11 +1,13 @@
 package com.grupo7.dsi.tpai.models;
 
+import com.grupo7.dsi.tpai.dto.DetalleEventoSismicoDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @IdClass(EventoSismicoId.class)
@@ -236,22 +238,27 @@ public class EventoSismico {
         this.setEstadoActual(estadoBloqueado);
     }
 
-    // Devuelve una lista de Strings con los datos del Alcance, Clasificación y Origen del evento sísmico seleccionado.
-    public List<String> buscarDatosEventoSismicoSeleccionado() {
-
+    public List<String> getAlcanceClasificacionOrigen() {
         List<String> datos = new ArrayList<>();
-
         datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());
-
         datos.add("Clasificación: " + clasificacion.getNombre() + " (" +
                 clasificacion.getKmProfundidadDesde() + "km - " +
                 clasificacion.getKmProfundidadHasta() + "km)");
-
         datos.add("Origen: " + origenGeneracion.getNombre() + " - " + origenGeneracion.getDescripcion());
-
         return datos;
     }
 
+    public Map<EstacionSismologica, List<SerieTemporal>> getSeriesTemporalClasificadasPorEstacionSismologica(
+            Map<EstacionSismologica, List<SerieTemporal>> seriesTemporalesPorEstacion) {
+        // Recorrer el map y quitar las series temporales que no pertenezcan a este evento sismico
+        for (EstacionSismologica estacion : seriesTemporalesPorEstacion.keySet()) {
+            List<SerieTemporal> seriesTemporalesBDD = seriesTemporalesPorEstacion.get(estacion);
+            List<SerieTemporal> seriesTemporalesDelEventoSismisco = this.seriesTemporal;
+            // de las series temporales bdd quitar las que no esten en las series temporales del evento sismico
+            seriesTemporalesBDD.removeIf(serieTemporal -> !seriesTemporalesDelEventoSismisco.contains(serieTemporal));
+        }
+        return seriesTemporalesPorEstacion;
+    }
     public void rechazarEventoSismico(Estado estadoRechazado, Empleado responsableInspeccion) {
         // Validar que el estadoRechazado no sea null
         if (estadoRechazado == null) {
