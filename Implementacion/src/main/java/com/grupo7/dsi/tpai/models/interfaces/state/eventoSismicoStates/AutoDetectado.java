@@ -1,4 +1,8 @@
 package com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates;
 
-public class AutoDetectado {
+import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
+
+public class AutoDetectado extends IStateEventoSismico {
+
+    public AutoDetectado() {}
 }

@@ -11,6 +11,8 @@ import java.util.List;
 
 public class BloqueadoEnRevision extends IStateEventoSismico {
 
+    public BloqueadoEnRevision() {}
+
     @Override
     public void rechazar(EventoSismico eventoSismico, Empleado empleado) {
         LocalDateTime fechaHoraActual = LocalDateTime.now();

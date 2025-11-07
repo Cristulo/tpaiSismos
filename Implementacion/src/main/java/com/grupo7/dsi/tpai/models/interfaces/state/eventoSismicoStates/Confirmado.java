@@ -1,4 +1,8 @@
 package com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates;
 
-public class Confirmado {
+import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
+
+public class Confirmado extends IStateEventoSismico {
+
+    public Confirmado() {}
 }

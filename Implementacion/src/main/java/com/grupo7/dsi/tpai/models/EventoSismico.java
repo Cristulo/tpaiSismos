@@ -1,9 +1,7 @@
 package com.grupo7.dsi.tpai.models;
 
 import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
-import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.BloqueadoEnRevision;
-import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.PendienteDeRevision;
-import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.Rechazado;
+import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -101,9 +99,16 @@ public class EventoSismico {
     private void inicializarEstadoState() {
         if (estadoActual == null) return;
         switch (estadoActual.getNombre()) {
+            case "Auto confirmado" -> this.estadoActualComportamiento = new AutoConfirmado();
+            case "Auto detectado" -> this.estadoActualComportamiento = new AutoDetectado();
             case "Bloqueado en revision" -> this.estadoActualComportamiento = new BloqueadoEnRevision();
-            case "Rechazado" -> this.estadoActualComportamiento = new Rechazado();
+            case "Cerrado" ->  this.estadoActualComportamiento = new Cerrado();
+            case "Confirmado" -> this.estadoActualComportamiento = new Confirmado();
+            case "Derivado a experto" -> this.estadoActualComportamiento = new DerivadoAExperto();
+            case "Pendiente de cierre" -> this.estadoActualComportamiento = new PendienteDeCierre();
             case "Pendiente revision" -> this.estadoActualComportamiento = new PendienteDeRevision();
+            case "Rechazado" -> this.estadoActualComportamiento = new Rechazado();
+            case "Sin revision" -> this.estadoActualComportamiento = new SinRevision();
             default -> this.estadoActualComportamiento = null;
         }
     }
@@ -136,6 +141,60 @@ public class EventoSismico {
         estadoActualComportamiento.rechazar(this, responsableInspeccion);
     }
 
+    public void validarAutoConfirmado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarAutoConfirmado(this, responsableCambioEstado);
+    }
+
+    public void validarAutoDetectado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarAutoDetectado(this, responsableCambioEstado);
+    }
+
+    public void derivarExperto(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.derivarExperto(this, responsableCambioEstado);
+    }
+
+    public void confirmar(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.confirmar(this, responsableCambioEstado);
+    }
+
+    public void validarConfirmado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarConfirmado(this, responsableCambioEstado);
+    }
+
+    public void pendienteDeCierre(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.pendienteDeCierre(this, responsableCambioEstado);
+    }
+
+    public void pendienteDeRevision(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.pendienteDeRevision(this, responsableCambioEstado);
+    }
+
+    public void sinRevision(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.sinRevision(this, responsableCambioEstado);
+    }
+
+    public void cerrar(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.cerrar(this, responsableCambioEstado);
+    }
+
     public List<String> getAlcanceClasificacionOrigen() {
         List<String> datos = new ArrayList<>();
         datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());
@@ -157,6 +216,5 @@ public class EventoSismico {
         }
         return seriesTemporalesPorEstacion;
     }
-
 
 }
