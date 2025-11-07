@@ -6,34 +6,41 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" alignment="CENTER" style="-fx-background-color: #f4f4f4; -fx-padding: 40;"
-      fx:controller="com.grupo7.dsi.tpai.controllers.VentanaPrincipalController">
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.grupo7.dsi.tpai.controllers.VentanaPrincipalController"
+      spacing="25" alignment="CENTER"
+      prefWidth="500" prefHeight="550"
+      stylesheets="@light-theme.css"
+      styleClass="card-pane">
     <children>
 
         <ImageView fitWidth="80" fitHeight="80" preserveRatio="true">
             <image>
-                <Image url="/views/sismografia.png" />
+                <Image url="/views/logo-red-sismica.jpeg" />
             </image>
         </ImageView>
 
-        <Label text="Gestión de Eventos Sísmicos">
-            <font>
-                <Font name="Arial Bold" size="24"/>
-            </font>
-        </Label>
+        <Label text="Gestión de Eventos Sísmicos" styleClass="titulo-principal" />
 
-        <Button text="Registrar resultado de revisión manual" fx:id="btnRegistrarRevision" onAction="#handleRegistrarRevision"
-                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+        <Button text="Registrar resultado de revisión manual"
+                fx:id="btnRegistrarRevision"
+                onAction="#handleRegistrarRevision"
+                styleClass="button-accion"
+                prefWidth="320" />
 
-        <Button text="Cerrar Orden de Inspección" fx:id="btnConsultarEventos"
-                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+        <Button text="Cerrar Orden de Inspección"
+                fx:id="btnConsultarEventos"
+                prefWidth="320" />
 
-        <Button text="Generar reporte" fx:id="btnGenerarReporte"
-                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+        <Button text="Generar reporte"
+                fx:id="btnGenerarReporte"
+                prefWidth="320" />
 
-        <Button text="Salir" fx:id="btnSalir" onAction="#handleSalir"
-                style="-fx-font-size: 14px; -fx-pref-width: 300px; -fx-background-color: #ff4d4d; -fx-text-fill: white;" />
+        <Button text="Salir"
+                fx:id="btnSalir"
+                onAction="#handleSalir"
+                styleClass="button-peligro"
+                prefWidth="320" />
     </children>
 </VBox>

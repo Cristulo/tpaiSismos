@@ -5,23 +5,25 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual"
-            prefWidth="800" prefHeight="600"
-            style="-fx-background-color: #f4f4f4;">
+            prefWidth="1024" prefHeight="768"
+            stylesheets="@light-theme.css">
 
-    <VBox spacing="20" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
-          AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
-          style="-fx-alignment: center;">
+    <VBox spacing="20" alignment="CENTER" styleClass="card-pane"
+          AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
+          AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
 
-        <ImageView fitWidth="760" fitHeight="540" preserveRatio="true">
+        <ImageView fitWidth="960" fitHeight="620" preserveRatio="true">
             <image>
                 <Image url="/views/mapaSismo.png"/>
             </image>
         </ImageView>
 
-        <Button text="Volver" onAction="#handleCerrarDetalleEvento"
-                style="-fx-font-size: 14px; -fx-padding: 5 20 5 20;" />
+        <Button text="Volver"
+                onAction="#handleCerrarDetalleEvento"
+                styleClass="button-peligro" />
     </VBox>
 </AnchorPane>

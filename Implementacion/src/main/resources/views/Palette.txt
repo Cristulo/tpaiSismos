@@ -1,0 +1,29 @@
+/* CSS HEX */
+--highland: #7a9568;
+--mandys-pink: #f5bbba;
+--woodland: #36522a;
+--schist: #a9b69f;
+--linen: #f9ded9;
+--dingley: #5b744a;
+--azalea: #f8cfc9;
+--sage: #8d9e7c;
+
+/* SCSS HEX */
+$highland: #7a9568;
+$mandys-pink: #f5bbba;
+$woodland: #36522a;
+$schist: #a9b69f;
+$linen: #f9ded9;
+$dingley: #5b744a;
+$azalea: #f8cfc9;
+$sage: #8d9e7c;
+
+/* SCSS RGB */
+$highland: rgba(122,149,104,1);
+$mandys-pink: rgba(245,187,186,1);
+$woodland: rgba(54,82,42,1);
+$schist: rgba(169,182,159,1);
+$linen: rgba(249,222,217,1);
+$dingley: rgba(91,116,74,1);
+$azalea: rgba(248,207,201,1);
+$sage: rgba(141,158,124,1);

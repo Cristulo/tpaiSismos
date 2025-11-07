@@ -5,25 +5,23 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual"
-            prefWidth="600" prefHeight="500"
-            style="-fx-background-color: #eeeeee;">
+            prefWidth="800" prefHeight="700"
+            stylesheets="@light-theme.css">
 
     <VBox spacing="20"
-          AnchorPane.topAnchor="10"
-          AnchorPane.leftAnchor="10"
-          AnchorPane.rightAnchor="10"
-          AnchorPane.bottomAnchor="60"
-          style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 10;">
+          styleClass="card-pane"
+          AnchorPane.topAnchor="20"
+          AnchorPane.leftAnchor="20"
+          AnchorPane.rightAnchor="20"
+          AnchorPane.bottomAnchor="80">
 
         <Label text="📋 Detalle de Evento Sísmico"
-               style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+               styleClass="titulo-seccion" />
 
-        <!-- Datos principales -->
         <TitledPane text="Datos Principales" expanded="true">
             <ListView fx:id="listDatosPrincipales" prefHeight="120"/>
         </TitledPane>
 
-        <!-- Series por estación -->
         <TitledPane text="Series Temporales por Estación" expanded="false">
             <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="200">
                 <content>
@@ -36,7 +34,6 @@
             </ScrollPane>
         </TitledPane>
 
-        <!-- Códigos de sismograma -->
         <TitledPane text="Códigos de Sismograma" expanded="false">
             <ListView fx:id="listCodigosSismograma" prefHeight="100"/>
         </TitledPane>
@@ -44,9 +41,9 @@
 
     <Button fx:id="btnSiguiente"
             text="Cerrar"
-            AnchorPane.bottomAnchor="10"
-            AnchorPane.rightAnchor="10"
+            styleClass="button-peligro"
+            AnchorPane.bottomAnchor="20"
+            AnchorPane.rightAnchor="20"
             prefWidth="100"
-            style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;"
             onAction="#handleCerrarDetalleEvento"/>
 </AnchorPane>

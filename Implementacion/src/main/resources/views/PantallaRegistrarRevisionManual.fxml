@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.AnchorPane?>
+
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             fx:id="rootPane"
             fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual"
-            prefWidth="800" prefHeight="600"
-            style="-fx-background-color: #f4f4f4;" />
+            prefWidth="1200" prefHeight="800"
+            stylesheets="@light-theme.css" />
