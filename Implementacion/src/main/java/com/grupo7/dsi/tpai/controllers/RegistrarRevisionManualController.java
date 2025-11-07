@@ -112,15 +112,7 @@ public class RegistrarRevisionManualController {
 
     // Gestiona el bloqueo del evento sísmico en revisión
     private void bloquearEnRevisionEventoSismico() {
-
-        // Buscar el estado "Bloqueado en revisión" de la base de datos
-        Estado estadoBloqueado = estadosBDD.stream()
-                .filter(estado -> estado.sosBloqueadoEnRevision())
-                .findFirst()
-                .orElse(null);
-        // Cambiar el estado del evento sísmico a "Bloqueado"
-        LocalDateTime fechaHoraActual = LocalDateTime.now();
-        this.eventoSismicoSeleccionado.bloquearEnRevision(estadoBloqueado, fechaHoraActual);
+        this.eventoSismicoSeleccionado.bloquearEnRevision(null);
 
     }
 
@@ -267,7 +259,7 @@ public class RegistrarRevisionManualController {
         // Buscar el empleado que está realizando la revisión
         Usuario usuarioDeLaSesion = sesion.getUsuario();
         Empleado empleado = usuarioDeLaSesion.getEmpleado();
-        eventoSismicoSeleccionado.rechazarEventoSismico(estadoRechazado, empleado);
+        eventoSismicoSeleccionado.rechazar(empleado);
         finCu();
     }
 
