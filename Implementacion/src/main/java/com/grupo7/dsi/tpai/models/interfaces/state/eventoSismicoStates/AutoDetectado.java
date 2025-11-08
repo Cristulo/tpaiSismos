@@ -5,4 +5,9 @@ import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
 public class AutoDetectado extends IStateEventoSismico {
 
     public AutoDetectado() {}
+
+    @Override
+    public Boolean sosAutoDetectado() {
+        return true;
+    }
 }

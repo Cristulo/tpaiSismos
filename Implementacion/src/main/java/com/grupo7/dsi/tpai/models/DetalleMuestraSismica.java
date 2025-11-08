@@ -14,7 +14,6 @@ public class DetalleMuestraSismica {
     @JoinColumn(name = "tipo_de_dato", referencedColumnName = "denominacion", nullable = false) // o el campo PK real
     private TipoDeDato tipoDeDato;
 
-    // Otros atributos si querés...
 
     public DetalleMuestraSismica() {}
 

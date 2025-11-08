@@ -1,9 +1,14 @@
 package com.grupo7.dsi.tpai.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @IdClass(CambioEstadoId.class)
 public class CambioEstado {
@@ -45,54 +50,6 @@ public class CambioEstado {
         this.estadoAmbito = estadoParametro.getAmbito();
         this.estado = estadoParametro;
         this.fechaHoraInicio = LocalDateTime.now();
-    }
-
-    public LocalDateTime getFechaHoraInicio() {
-        return fechaHoraInicio;
-    }
-
-    public void setFechaHoraInicio(LocalDateTime fechaHoraInicio) {
-        this.fechaHoraInicio = fechaHoraInicio;
-    }
-
-    public String getEstadoNombre() {
-        return estadoNombre;
-    }
-
-    public void setEstadoNombre(String estadoNombre) {
-        this.estadoNombre = estadoNombre;
-    }
-
-    public String getEstadoAmbito() {
-        return estadoAmbito;
-    }
-
-    public void setEstadoAmbito(String estadoAmbito) {
-        this.estadoAmbito = estadoAmbito;
-    }
-
-    public LocalDateTime getFechaHoraFin() {
-        return fechaHoraFin;
-    }
-
-    public void setFechaHoraFin(LocalDateTime fechaHoraFin) {
-        this.fechaHoraFin = fechaHoraFin;
-    }
-
-    public Estado getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Estado estado) {
-        this.estado = estado;
-    }
-
-    public Empleado getResponsableInspeccion() {
-        return responsableInspeccion;
-    }
-
-    public void setResponsableInspeccion(Empleado responsableInspeccion) {
-        this.responsableInspeccion = responsableInspeccion;
     }
 
     public List<MotivoFueraServicio> getMotivoFueraServicio() {

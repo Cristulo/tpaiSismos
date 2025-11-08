@@ -43,15 +43,9 @@ public class EventoSismico {
     @JoinColumn(name = "alcance_sismo", referencedColumnName = "nombre")
     private AlcanceSismo alcanceSismo;
 
-    @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "estado_nombre", referencedColumnName = "nombre"),
-            @JoinColumn(name = "estado_ambito", referencedColumnName = "ambito")
-    })
-    private Estado estadoActual;
-
-    @Transient
-    private IStateEventoSismico estadoActualComportamiento;
+    @Convert(converter = EstadoEventoConverter.class) // Esto esta feo, revisar
+    @Column(name = "estado_codigo", length = 32, nullable = false)
+    private IStateEventoSismico estadoActual;
 
     @ManyToOne
     @JoinColumn(name = "analista_supervisor_legajo", referencedColumnName = "id")
@@ -73,7 +67,12 @@ public class EventoSismico {
 
     public EventoSismico() {}
 
-    public EventoSismico(LocalDateTime fechaHoraFin, LocalDateTime fechaHoraOcurrencia, String latitudEpicentro, String latitudHipocentro, String longitudEpicentro, String longitudHipocentro, Float valorMagnitud, ClasificacionSismo clasificacion, MagnitudRichter magnitud, OrigenDeGeneracion origenGeneracion, AlcanceSismo alcanceSismo, Estado estadoActual, Empleado analistaSupervisor, List<CambioEstado> cambiosEstado, List<SerieTemporal> seriesTemporal) {
+    public EventoSismico(LocalDateTime fechaHoraFin, LocalDateTime fechaHoraOcurrencia, String latitudEpicentro,
+                         String latitudHipocentro, String longitudEpicentro, String longitudHipocentro,
+                         Float valorMagnitud, ClasificacionSismo clasificacion, MagnitudRichter magnitud,
+                         OrigenDeGeneracion origenGeneracion, AlcanceSismo alcanceSismo, IStateEventoSismico estadoActual,
+                         Empleado analistaSupervisor, List<CambioEstado> cambiosEstado,
+                         List<SerieTemporal> seriesTemporal, Boolean esAutoDetectado) {
         this.fechaHoraFin = fechaHoraFin;
         this.fechaHoraOcurrencia = fechaHoraOcurrencia;
         this.latitudEpicentro = latitudEpicentro;
@@ -85,116 +84,88 @@ public class EventoSismico {
         this.magnitud = magnitud;
         this.origenGeneracion = origenGeneracion;
         this.alcanceSismo = alcanceSismo;
-        this.estadoActual = estadoActual;
         this.analistaSupervisor = analistaSupervisor;
         this.cambiosEstado = cambiosEstado;
         this.seriesTemporal = seriesTemporal;
-    }
-
-    public void agregarCambioEstadoAEvento(CambioEstado cambioEstadoBloqueadoEnRevision) {
-        this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
-    }
-
-    @PostLoad
-    private void inicializarEstadoState() {
-        if (estadoActual == null) return;
-        switch (estadoActual.getNombre()) {
-            case "Auto confirmado" -> this.estadoActualComportamiento = new AutoConfirmado();
-            case "Auto detectado" -> this.estadoActualComportamiento = new AutoDetectado();
-            case "Bloqueado en revision" -> this.estadoActualComportamiento = new BloqueadoEnRevision();
-            case "Cerrado" ->  this.estadoActualComportamiento = new Cerrado();
-            case "Confirmado" -> this.estadoActualComportamiento = new Confirmado();
-            case "Derivado a experto" -> this.estadoActualComportamiento = new DerivadoAExperto();
-            case "Pendiente de cierre" -> this.estadoActualComportamiento = new PendienteDeCierre();
-            case "Pendiente revision" -> this.estadoActualComportamiento = new PendienteDeRevision();
-            case "Rechazado" -> this.estadoActualComportamiento = new Rechazado();
-            case "Sin revision" -> this.estadoActualComportamiento = new SinRevision();
-            default -> this.estadoActualComportamiento = null;
+        if (esAutoDetectado) {
+            this.estadoActual = new AutoDetectado();
+        } else if (!esAutoDetectado) {
+            this.estadoActual = new AutoConfirmado();
+        } else {
+            this.estadoActual = estadoActual;
         }
+    }
+
+
+
+    public void agregarCambioEstadoAEvento(CambioEstado cambioEstado) {
+        this.cambiosEstado.add(cambioEstado);
     }
 
     public Boolean sosPendienteDeRevision() {
-        if (this.estadoActual.sosPendienteDeRevision()) {
-            return true;
-        }
-        return false;
+        return this.estadoActual.sosPendienteDeRevision();
     }
 
     public Boolean sosAutoDetectado(){
-        if (this.estadoActual.sosAutoDetectado()) {
-            return true;
-        }
-        return false;
+        return this.estadoActual.sosAutoDetectado();
     }
 
     // Metodos que delegan a los estados desde el evento sismico
-
-    public void bloquearEnRevision(List<Estado> estadosBDD, Empleado responsableCambioEstado) {
-        if (estadoActualComportamiento == null)
+    public void bloquearEnRevision(List<Estado> estadosBDD, Usuario responsableCambioEstado) {
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.bloquearEnRevision(this, estadosBDD, responsableCambioEstado);
+        estadoActual.bloquearEnRevision(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void rechazar(List<Estado> estados, Empleado responsableInspeccion) {
-        if (estadoActualComportamiento == null)
+    public void rechazar(List<Estado> estadosBDD, Usuario responsableCambioEstado) {
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.rechazar(this, estados, responsableInspeccion);
+        estadoActual.rechazar(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void validarAutoConfirmado(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void validarAutoConfirmado(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.validarAutoConfirmado(this, responsableCambioEstado);
+        estadoActual.validarAutoConfirmado(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void validarAutoDetectado(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void validarAutoDetectado(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.validarAutoDetectado(this, responsableCambioEstado);
+        estadoActual.validarAutoDetectado(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void derivarExperto(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void derivarExperto(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.derivarExperto(this, responsableCambioEstado);
+        estadoActual.derivarExperto(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void confirmar(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void confirmar(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.confirmar(this, responsableCambioEstado);
+        estadoActual.confirmar(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void validarConfirmado(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void validarConfirmado(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.validarConfirmado(this, responsableCambioEstado);
+        estadoActual.validarConfirmado(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void pendienteDeCierre(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void pendienteDeCierre(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.pendienteDeCierre(this, responsableCambioEstado);
+        estadoActual.pendienteDeCierre(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void pendienteDeRevision(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void pendienteDeRevision(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.pendienteDeRevision(this, responsableCambioEstado);
+        estadoActual.pendienteDeRevision(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void sinRevision(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void sinRevision(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.sinRevision(this, responsableCambioEstado);
+        estadoActual.sinRevision(this, estadosBDD, responsableCambioEstado);
     }
-
-    public void cerrar(Empleado responsableCambioEstado){
-        if (estadoActualComportamiento == null)
+    public void cerrar(List<Estado> estadosBDD, Usuario responsableCambioEstado){
+        if (estadoActual == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.cerrar(this, responsableCambioEstado);
+        estadoActual.cerrar(this, estadosBDD, responsableCambioEstado);
     }
-
     public List<String> getAlcanceClasificacionOrigen() {
         List<String> datos = new ArrayList<>();
         datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());

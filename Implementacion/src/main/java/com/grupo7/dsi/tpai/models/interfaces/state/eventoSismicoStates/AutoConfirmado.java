@@ -6,4 +6,9 @@ public class AutoConfirmado extends IStateEventoSismico {
 
     public AutoConfirmado() {}
 
+    @Override
+    public Boolean sosAutoConfirmado() {
+        return true;
+    }
+
 }

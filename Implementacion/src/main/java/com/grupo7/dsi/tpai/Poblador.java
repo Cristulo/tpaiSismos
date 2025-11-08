@@ -1,6 +1,8 @@
 package com.grupo7.dsi.tpai;
 
 import com.grupo7.dsi.tpai.models.*;
+import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.AutoDetectado;
+import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.PendienteDeRevision;
 import com.grupo7.dsi.tpai.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -210,7 +212,7 @@ public class Poblador implements CommandLineRunner {
             evento1.setLatitudHipocentro("30.2");
             evento1.setLongitudHipocentro("66.95");
             evento1.setValorMagnitud(4.0f);
-            evento1.setEstadoActual(estadoPendienteRevision);
+            evento1.setEstadoActual(new PendienteDeRevision());
             evento1.setCambiosEstado(cambiosEstado);
             evento1.setClasificacion(clasificacionModerada);
             evento1.setMagnitud(magnitudMedia);
@@ -228,7 +230,7 @@ public class Poblador implements CommandLineRunner {
             evento2.setLatitudHipocentro("-31.45");
             evento2.setLongitudHipocentro("-64.20");
             evento2.setValorMagnitud(6.5f);
-            evento2.setEstadoActual(estadoPendienteRevision);
+            evento2.setEstadoActual(new PendienteDeRevision());
             evento2.setCambiosEstado(cambiosEstado);
             evento2.setClasificacion(clasificacionProfunda);
             evento2.setAnalistaSupervisor(empleado);
@@ -245,7 +247,7 @@ public class Poblador implements CommandLineRunner {
             evento3.setLatitudHipocentro("-32.6");
             evento3.setLongitudHipocentro("-69.0");
             evento3.setValorMagnitud(7.2f);
-            evento3.setEstadoActual(estadoPendienteRevision);
+            evento3.setEstadoActual(new PendienteDeRevision());
             evento3.setCambiosEstado(cambiosEstado);
             evento3.setClasificacion(clasificacionIntermedia);
             evento3.setAnalistaSupervisor(empleado);
@@ -262,7 +264,7 @@ public class Poblador implements CommandLineRunner {
             evento4.setLatitudHipocentro("-24.80");
             evento4.setLongitudHipocentro("-65.45");
             evento4.setValorMagnitud(1.8f);
-            evento4.setEstadoActual(estadoAutoDetectado);
+            evento4.setEstadoActual(new AutoDetectado());
             evento4.setClasificacion(clasificacionSuperficial);
             evento4.setMagnitud(magnitudLeve);
             evento4.setAnalistaSupervisor(empleado);
@@ -278,7 +280,7 @@ public class Poblador implements CommandLineRunner {
             evento5.setLatitudHipocentro("-31.43");
             evento5.setLongitudHipocentro("-64.19");
             evento5.setValorMagnitud(2.5f);
-            evento5.setEstadoActual(estadoPendienteRevision);
+            evento5.setEstadoActual(new PendienteDeRevision());
             evento5.setCambiosEstado(cambiosEstado);
             evento5.setClasificacion(clasificacionSuperficial);
             evento5.setMagnitud(magnitudAlta); // el original 2.5f
@@ -295,7 +297,7 @@ public class Poblador implements CommandLineRunner {
             evento6.setLatitudHipocentro("-24.80");
             evento6.setLongitudHipocentro("-65.44");
             evento6.setValorMagnitud(1.8f);
-            evento6.setEstadoActual(estadoPendienteRevision);
+            evento6.setEstadoActual(new PendienteDeRevision());
             evento6.setCambiosEstado(cambiosEstado);
             evento6.setClasificacion(clasificacionSuperficial);
             evento6.setAnalistaSupervisor(empleado);
@@ -312,7 +314,7 @@ public class Poblador implements CommandLineRunner {
             evento7.setLatitudHipocentro("-32.53");
             evento7.setLongitudHipocentro("-68.87");
             evento7.setValorMagnitud(7.2f);
-            evento7.setEstadoActual(estadoPendienteRevision);
+            evento7.setEstadoActual(new PendienteDeRevision());
             evento7.setCambiosEstado(cambiosEstado);
             evento7.setClasificacion(clasificacionIntermedia);
             evento7.setMagnitud(magnitudSevera);
@@ -329,7 +331,7 @@ public class Poblador implements CommandLineRunner {
             evento8.setLatitudHipocentro("-31.41");
             evento8.setLongitudHipocentro("-64.18");
             evento8.setValorMagnitud(2.5f);
-            evento8.setEstadoActual(estadoPendienteRevision);
+            evento8.setEstadoActual(new PendienteDeRevision());
             evento8.setCambiosEstado(cambiosEstado);
             evento8.setClasificacion(clasificacionIntermedia); // Clasificacion 1
             evento8.setMagnitud(magnitudLeve); // 2.5f

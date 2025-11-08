@@ -5,4 +5,10 @@ import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
 public class SinRevision extends IStateEventoSismico {
 
     public SinRevision() {}
+
+    @Override
+    public Boolean sosSinRevision() {
+        return true;
+    }
+
 }

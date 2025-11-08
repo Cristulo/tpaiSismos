@@ -229,7 +229,7 @@ public class RegistrarRevisionManualController {
         System.out.println("Validando evento sísmico seleccionado...");
         // Mostrar por terminal todos los datos del evento sismico seleccionado
         System.out.println("Evento sísmico seleccionado: " + eventoSismicoSeleccionado.getFechaHoraOcurrencia() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
-        System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getNombre());
+        System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getClass().getSimpleName());
         System.out.println("Alcance: " + eventoSismicoSeleccionado.getAlcanceSismo().getNombre() + " - " + eventoSismicoSeleccionado.getAlcanceSismo().getDescripcion());
         System.out.println("Origen de generación: " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getDescripcion());
         System.out.println("Magnitud: " + eventoSismicoSeleccionado.getMagnitud().getNumero() + " - " + eventoSismicoSeleccionado.getMagnitud().getDescripcionMagnitud());
@@ -252,16 +252,14 @@ public class RegistrarRevisionManualController {
     private void actualizarEstadoEventoSismicoRechazado(){
         // Buscar el empleado que está realizando la revisión
         Usuario usuarioDeLaSesion = sesion.getUsuario();
-        Empleado empleado = usuarioDeLaSesion.getEmpleado();
-        eventoSismicoSeleccionado.rechazar(empleado);
+        eventoSismicoSeleccionado.rechazar(estadosBDD, usuarioDeLaSesion);
         finCu();
     }
 
     private void finCu(){
         // Mostrar todos los datos del evento sismico por terminal
-        eventoSismicoService.save(eventoSismicoSeleccionado);
         System.out.println("Evento sísmico rechazado: " + eventoSismicoSeleccionado.getFechaHoraOcurrencia() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
-        System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getNombre());
+        System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getClass().getSimpleName());
         System.out.println("Responsable de la revisión: " + eventoSismicoSeleccionado.getCambiosEstado().get(eventoSismicoSeleccionado.getCambiosEstado().size() - 1).getResponsableInspeccion().getNombre());
         pantalla.cerrarVentana();
 

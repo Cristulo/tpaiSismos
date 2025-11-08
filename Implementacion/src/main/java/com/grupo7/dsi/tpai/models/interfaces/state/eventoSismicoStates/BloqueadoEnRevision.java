@@ -1,9 +1,6 @@
 package com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates;
 
-import com.grupo7.dsi.tpai.models.CambioEstado;
-import com.grupo7.dsi.tpai.models.Empleado;
-import com.grupo7.dsi.tpai.models.Estado;
-import com.grupo7.dsi.tpai.models.EventoSismico;
+import com.grupo7.dsi.tpai.models.*;
 import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
 import com.grupo7.dsi.tpai.service.EstadoService;
 
@@ -14,22 +11,25 @@ public class BloqueadoEnRevision extends IStateEventoSismico {
 
     public BloqueadoEnRevision() {}
 
-    private EstadoService estadoService = new EstadoService();
-
-    private List<Estado> estadosEventoSismico = estadoService.findAllByAmbito("Evento sismico");
+    @Override
+    public Boolean sosBloqueadoEnRevision() {
+        return true;
+    }
 
     @Override
-    public void rechazar(EventoSismico eventoSismico, List<Estado> estados, Empleado empleado) {
+    public void rechazar(EventoSismico eventoSismico, List<Estado> estados, Usuario usuarioDeLaSesion) {
+
+        Empleado empleado = usuarioDeLaSesion.getEmpleado();
         LocalDateTime fechaHoraActual = LocalDateTime.now();
+
         Estado estadoRechazado = null;
 
-        // Buscar el cambio de estado abierto
+        // Buscar y cerrar el ultimo cambio de estado
         List<CambioEstado> cambiosEstadoDelEventoSismico = eventoSismico.getCambiosEstado();
         CambioEstado cambioEstadoAbierto = null;
         for (CambioEstado cambioEstado : cambiosEstadoDelEventoSismico) {
             if (cambioEstado.esEstadoActual()){cambioEstadoAbierto = cambioEstado;}
         }
-        // Cerrar el cambio de estado abierto
         if (cambioEstadoAbierto != null) {
             cambioEstadoAbierto.setFechaHoraFin(fechaHoraActual);
         }
@@ -40,16 +40,15 @@ public class BloqueadoEnRevision extends IStateEventoSismico {
                 estadoRechazado = estado;
             }
         }
-        CambioEstado nuevoCambioEstado = new CambioEstado();
+
+        CambioEstado nuevoCambioEstado = new CambioEstado(estadoRechazado);
         nuevoCambioEstado.setFechaHoraInicio(fechaHoraActual);
-        nuevoCambioEstado.setEstado(estadoRechazado);
         nuevoCambioEstado.setResponsableInspeccion(empleado);
-        eventoSismico.getCambiosEstado().add(nuevoCambioEstado);
+        eventoSismico.agregarCambioEstadoAEvento(nuevoCambioEstado);
 
         // Setear el estado actual del evento sismico
         Rechazado estadoRechazadoComportamiento = new Rechazado();
-        eventoSismico.setEstadoActualComportamiento(estadoRechazadoComportamiento);
-        eventoSismico.setEstadoActual(new Estado("Rechazado", "Evento Sismico"));
+        eventoSismico.setEstadoActual(estadoRechazadoComportamiento);
 
     }
 }
