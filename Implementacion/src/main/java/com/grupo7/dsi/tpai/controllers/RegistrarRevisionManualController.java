@@ -103,7 +103,7 @@ public class RegistrarRevisionManualController {
             }
         }
 
-        // Cambio de estado del evento sísmico
+        // Cambio de estado del evento sísmico - ENGANCHE PATRON STATE
         bloquearEnRevisionEventoSismico();
 
         // Buscar los datos del evento sismico
@@ -112,8 +112,7 @@ public class RegistrarRevisionManualController {
 
     // Gestiona el bloqueo del evento sísmico en revisión
     private void bloquearEnRevisionEventoSismico() {
-        this.eventoSismicoSeleccionado.bloquearEnRevision(null);
-
+        this.eventoSismicoSeleccionado.bloquearEnRevision(estadosBDD,null);
     }
 
     // Busca los datos que se solicitan para el evento sísmico seleccionado
@@ -251,11 +250,6 @@ public class RegistrarRevisionManualController {
     }
 
     private void actualizarEstadoEventoSismicoRechazado(){
-        Estado estadoRechazado = estadosBDD.stream()
-                .filter(estado -> estado.sosRechazado())
-                .findFirst()
-                .orElse(null);
-
         // Buscar el empleado que está realizando la revisión
         Usuario usuarioDeLaSesion = sesion.getUsuario();
         Empleado empleado = usuarioDeLaSesion.getEmpleado();
@@ -265,6 +259,7 @@ public class RegistrarRevisionManualController {
 
     private void finCu(){
         // Mostrar todos los datos del evento sismico por terminal
+        eventoSismicoService.save(eventoSismicoSeleccionado);
         System.out.println("Evento sísmico rechazado: " + eventoSismicoSeleccionado.getFechaHoraOcurrencia() + " - " + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
         System.out.println("Estado actual: " + eventoSismicoSeleccionado.getEstadoActual().getNombre());
         System.out.println("Responsable de la revisión: " + eventoSismicoSeleccionado.getCambiosEstado().get(eventoSismicoSeleccionado.getCambiosEstado().size() - 1).getResponsableInspeccion().getNombre());

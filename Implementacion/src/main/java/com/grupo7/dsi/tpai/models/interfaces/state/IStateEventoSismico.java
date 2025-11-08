@@ -6,38 +6,38 @@ import com.grupo7.dsi.tpai.models.Estado;
 import com.grupo7.dsi.tpai.models.EventoSismico;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public abstract class IStateEventoSismico {
 
-    protected static final String AMBITO = "Evento sismico";
-
-    // Métodos por defecto que lanzan excepción si no son sobreescritos{}
+    // Métodos por defecto que lanzan excepción si no son sobreescritos
         protected void prohibida(String accion) {
             throw new IllegalStateException("Acción '" + accion + "' no permitida desde " + this.getClass().getSimpleName());}
-        public void validarAutoConfirmado(EventoSismico eventoSismico, Empleado responsableCambioEstado) {
+        public void validarAutoConfirmado(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado) {
             prohibida("validarAutoConfirmado");}
-        public void validarAutoDetectado(EventoSismico eventoSismico, Empleado responsableCambioEstado)  {
+        public void validarAutoDetectado(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)  {
             prohibida("validarAutoDetectado"); }
-        public void bloquearEnRevision(EventoSismico eventoSismico, Empleado responsableCambioEstado)    {
+        public void bloquearEnRevision(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)    {
             prohibida("bloquearEnRevision"); }
-        public void derivarExperto(EventoSismico eventoSismico, Empleado responsableCambioEstado)        {
+        public void derivarExperto(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)        {
             prohibida("derivarExperto"); }
-        public void rechazar(EventoSismico eventoSismico, Empleado responsableCambioEstado)              {
+        public void rechazar(EventoSismico eventoSismico,List<Estado> estadosBDD, List<Estado> estados, Empleado responsableCambioEstado)              {
             prohibida("rechazar"); }
-        public void confirmar(EventoSismico eventoSismico, Empleado responsableCambioEstado)             {
+        public void confirmar(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)             {
             prohibida("confirmar"); }
-        public void validarConfirmado(EventoSismico eeventoSismico, Empleado responsableCambioEstado)     {
+        public void validarConfirmado(EventoSismico eeventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)     {
             prohibida("validarConfirmado"); }
-        public void pendienteDeCierre(EventoSismico eventoSismico, Empleado responsableCambioEstado)     {
+        public void pendienteDeCierre(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)     {
             prohibida("pendienteDeCierre"); }
-        public void pendienteDeRevision(EventoSismico eventoSismico, Empleado responsableCambioEstado)   {
+        public void pendienteDeRevision(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)   {
             prohibida("pendienteDeRevision"); }
-        public void sinRevision(EventoSismico eventoSismico, Empleado responsableCambioEstado)           {
+        public void sinRevision(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)           {
             prohibida("sinRevision"); }
-        public void cerrar(EventoSismico eventoSismico, Empleado responsableCambioEstado)                {
+        public void cerrar(EventoSismico eventoSismico,List<Estado> estadosBDD, Empleado responsableCambioEstado)                {
             prohibida("cerrar"); }
 
-
+    /*
+    protected static final String AMBITO = "Evento sismico";
     protected void transicionar(EventoSismico eventoSismico,
                                 Empleado responsable,
                                 String nuevoNombreEstado,
@@ -61,6 +61,5 @@ public abstract class IStateEventoSismico {
         // 3) actualizar el comportamiento en memoria
         eventoSismico.setEstadoActualComportamiento(nuevoEstadoComportamiento);
     }
-
-
+    */
 }

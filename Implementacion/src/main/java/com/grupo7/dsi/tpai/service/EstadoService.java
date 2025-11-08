@@ -32,4 +32,8 @@ public class EstadoService {
         EstadoId id = new EstadoId(nombre, ambito);
         estadoRepository.deleteById(id);
     }
+
+    public List<Estado> findAllByAmbito(String ambito) {
+        return estadoRepository.findAllByAmbito(ambito);
+    }
 }

@@ -129,16 +129,16 @@ public class EventoSismico {
 
     // Metodos que delegan a los estados desde el evento sismico
 
-    public void bloquearEnRevision(Empleado responsableCambioEstado) {
+    public void bloquearEnRevision(List<Estado> estadosBDD, Empleado responsableCambioEstado) {
         if (estadoActualComportamiento == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.bloquearEnRevision(this, responsableCambioEstado);
+        estadoActualComportamiento.bloquearEnRevision(this, estadosBDD, responsableCambioEstado);
     }
 
-    public void rechazar(Empleado responsableInspeccion) {
+    public void rechazar(List<Estado> estados, Empleado responsableInspeccion) {
         if (estadoActualComportamiento == null)
             throw new IllegalStateException("No hay estado lógico inicializado.");
-        estadoActualComportamiento.rechazar(this, responsableInspeccion);
+        estadoActualComportamiento.rechazar(this, estados, responsableInspeccion);
     }
 
     public void validarAutoConfirmado(Empleado responsableCambioEstado){
