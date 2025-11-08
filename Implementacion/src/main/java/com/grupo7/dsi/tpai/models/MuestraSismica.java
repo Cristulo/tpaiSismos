@@ -14,8 +14,7 @@ public class MuestraSismica {
 
     private LocalDateTime fechaHoraMuestra;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "muestra_sismica_id") // la FK se guarda en DetalleMuestraSismica
+    @OneToMany(mappedBy = "muestraSismica", fetch = FetchType.EAGER)
     private List<DetalleMuestraSismica> detallesMuestraSismica;
 
     public MuestraSismica(LocalDateTime fechaHoraMuestra, List<DetalleMuestraSismica> detalleMuestraSismica) {

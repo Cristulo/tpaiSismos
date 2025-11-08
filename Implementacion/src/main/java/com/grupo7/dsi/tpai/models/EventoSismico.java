@@ -58,7 +58,7 @@ public class EventoSismico {
     })
     private List<CambioEstado> cambiosEstado;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumns({
             @JoinColumn(name = "origen_generacion", referencedColumnName = "origenGeneracion"),
             @JoinColumn(name = "fecha_hora_ocurrencia", referencedColumnName = "fechaHoraOcurrencia")
@@ -91,7 +91,7 @@ public class EventoSismico {
             this.estadoActual = new AutoDetectado();
         } else if (!esAutoDetectado) {
             this.estadoActual = new AutoConfirmado();
-        } else {
+        } else if (estadoActual != null) {
             this.estadoActual = estadoActual;
         }
     }

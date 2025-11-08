@@ -11,9 +11,12 @@ public class DetalleMuestraSismica {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "tipo_de_dato", referencedColumnName = "denominacion", nullable = false) // o el campo PK real
+    @JoinColumn(name = "tipo_de_dato", referencedColumnName = "denominacion", nullable = false)
     private TipoDeDato tipoDeDato;
 
+    @ManyToOne
+    @JoinColumn(name = "muestra_sismica_id", nullable = false)
+    private MuestraSismica muestraSismica;
 
     public DetalleMuestraSismica() {}
 

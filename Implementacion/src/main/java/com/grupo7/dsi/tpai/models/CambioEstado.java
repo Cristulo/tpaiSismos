@@ -41,7 +41,7 @@ public class CambioEstado {
 
     @ManyToOne
     @JoinColumn(name = "sismografo_id")
-    private Sismografo sismografo; //Sismografos que tienen este cambio de estado
+    private Sismografo sismografo;
 
     public CambioEstado() {}
 
@@ -52,18 +52,10 @@ public class CambioEstado {
         this.fechaHoraInicio = LocalDateTime.now();
     }
 
-    public List<MotivoFueraServicio> getMotivoFueraServicio() {
-        return motivoFueraServicio;
-    }
-    public void setMotivoFueraServicio(List<MotivoFueraServicio> motivoFueraServicio) {
-        this.motivoFueraServicio = motivoFueraServicio;
-    }
     public Boolean esEstadoActual(){
         if (this.fechaHoraFin == null) {
             return true;
         }
         return false;
     }
-
-    // getters, setters, constructor vacío
 }
