@@ -46,5 +46,4 @@ public class PendienteDeRevision extends IStateEventoSismico {
         BloqueadoEnRevision estadoBloqueadoState = new BloqueadoEnRevision();
         evento.setEstadoActual(estadoBloqueadoState);
     }
-
 }
