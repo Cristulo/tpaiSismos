@@ -33,7 +33,7 @@ public class PantallaRegistrarRevisionManual implements Initializable {
 
     @FXML private AnchorPane rootPane;  // Contenedor base definido en VistaRegistrarRevisionManual.fxml
 
-    // ↓ Estos se inyectan al cargar la tabla ↓
+    //  Estos se inyectan al cargar la tabla
     @FXML private TableView<EventoSismicoTablaDTO> tablaEventos;
     @FXML private TableColumn<EventoSismicoTablaDTO, Boolean> colSeleccionar;
     @FXML private TableColumn<EventoSismicoTablaDTO, String>  colFechaHora;
@@ -90,7 +90,6 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             );
             loader.setControllerFactory(cls -> this);
             AnchorPane tablaView = loader.load();
-
             rootPane.getChildren().setAll(tablaView);
             AnchorPane.setTopAnchor(tablaView, 0.0);
             AnchorPane.setBottomAnchor(tablaView, 0.0);
@@ -141,13 +140,11 @@ public class PantallaRegistrarRevisionManual implements Initializable {
         EventoSismicoTablaDTO sel = tablaEventos.getItems().stream()
                 .filter(EventoSismicoTablaDTO::isSeleccionado)
                 .findFirst().orElse(null);
-
         if (sel == null) {
             new Alert(Alert.AlertType.WARNING,
                     "Debe seleccionar un evento sísmico").showAndWait();
             return;
         }
-
         gestor.tomarSeleccionEventoSismico(
                 sel.getFechaHora(), sel.getOrigenGeneracion()
         );
@@ -158,13 +155,11 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             new Alert(Alert.AlertType.WARNING, "No hay evento sísmico seleccionado.").showAndWait();
             return;
         }
-
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/views/VistaRegistrarRevisionManualDetalleES.fxml")); // ✅ acá estaba el problema
-            loader.setControllerFactory(cls -> this); // mantenemos el mismo controller
+            loader.setLocation(getClass().getResource("/views/VistaRegistrarRevisionManualDetalleES.fxml"));
+            loader.setControllerFactory(cls -> this);
             AnchorPane detalleView = loader.load();
-
             rootPane.getChildren().setAll(detalleView);
             AnchorPane.setTopAnchor(detalleView, 0.0);
             AnchorPane.setBottomAnchor(detalleView, 0.0);
@@ -173,7 +168,6 @@ public class PantallaRegistrarRevisionManual implements Initializable {
 
             Platform.runLater(() -> {
                 listDatosPrincipales.getItems().setAll(dto.getDatosPrincipales());
-
                 boxSeriesPorEstacion.getChildren().clear();
                 dto.getSeriesTemporalesPorEstacion().forEach((estacion, series) -> {
                     Label lblEstacion = new Label("Estación: " + estacion);
@@ -185,7 +179,6 @@ public class PantallaRegistrarRevisionManual implements Initializable {
                     seccion.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 10; -fx-background-radius: 5;");
                     boxSeriesPorEstacion.getChildren().add(seccion);
                 });
-
                 listCodigosSismograma.getItems().setAll(dto.getCodigosSismograma());
             });
 
@@ -205,7 +198,6 @@ public class PantallaRegistrarRevisionManual implements Initializable {
                 ButtonType.YES, ButtonType.NO);
         alert.setHeaderText(null);
         alert.setTitle("Visualización de Mapa");
-
         alert.showAndWait().ifPresent(response -> {
             tomarSeleccionVisualizacionMapa(response == ButtonType.YES);
         });
@@ -227,13 +219,11 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
             loader.setControllerFactory(cls -> this); // Si el controlador actual contiene la lógica
             AnchorPane nuevaVista = loader.load();
-
             rootPane.getChildren().setAll(nuevaVista);
             AnchorPane.setTopAnchor(nuevaVista, 0.0);
             AnchorPane.setBottomAnchor(nuevaVista, 0.0);
             AnchorPane.setLeftAnchor(nuevaVista, 0.0);
             AnchorPane.setRightAnchor(nuevaVista, 0.0);
-
         } catch (IOException e) {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Error al cargar la vista: " + rutaFXML).showAndWait();
@@ -246,25 +236,21 @@ public class PantallaRegistrarRevisionManual implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/VistaRegistrarRevisionManualModificacionES.fxml"));
             loader.setControllerFactory(cls -> this);
             AnchorPane vista = loader.load();
-
             rootPane.getChildren().setAll(vista);
             AnchorPane.setTopAnchor(vista, 0.0);
             AnchorPane.setBottomAnchor(vista, 0.0);
             AnchorPane.setLeftAnchor(vista, 0.0);
             AnchorPane.setRightAnchor(vista, 0.0);
-
             // Cargar los datos actuales desglosando cada línea
             if (datosActuales.size() >= 3) {
                 // Magnitud: 5.6 Moderado
                 String[] magnitud = datosActuales.get(0).replace("Magnitud: ", "").split(" ", 2);
                 txtMagnitudNumero.setText(magnitud[0]);
                 txtMagnitudDescripcion.setText(magnitud.length > 1 ? magnitud[1] : "");
-
                 // Alcance: Local - Se sintió en zona urbana
                 String[] alcance = datosActuales.get(1).replace("Alcance: ", "").split(" - ", 2);
                 txtAlcanceNombre.setText(alcance[0]);
                 txtAlcanceDescripcion.setText(alcance.length > 1 ? alcance[1] : "");
-
                 // Origen de generación: Tectónico - Movimiento de placas
                 String[] origen = datosActuales.get(2).replace("Origen de generación: ", "").split(" - ", 2);
                 txtOrigenNombre.setText(origen[0]);
@@ -288,13 +274,10 @@ public class PantallaRegistrarRevisionManual implements Initializable {
         alert.setTitle("Acción Final");
         alert.setHeaderText("¿Qué desea hacer con el evento sísmico?");
         alert.setContentText("Elegí una acción final:");
-
         ButtonType btnConfirmar = new ButtonType("✅ Confirmar");
         ButtonType btnRechazar = new ButtonType("❌ Rechazar");
         ButtonType btnRevisarExperto = new ButtonType("Solicitar a experto");
-
         alert.getButtonTypes().setAll(btnConfirmar, btnRechazar, btnRevisarExperto);
-
                 alert.showAndWait().ifPresent(respuesta -> {
                     if (respuesta == btnConfirmar) {
                         // Lógica para confirmar el evento sísmico

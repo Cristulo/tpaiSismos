@@ -8,25 +8,23 @@ import java.util.Map;
 public class DetalleEventoSismicoDTO {
 
     private List<String> datosPrincipales = new ArrayList<>();
+
+    // Mapa donde la clave es el codigo de la estacion y el valor es la lista de series temporales asociadas
     private Map<String, List<String>> seriesTemporalesPorEstacion = new HashMap<>();
     private List<String> codigosSismograma = new ArrayList<>();
 
     public List<String> getDatosPrincipales() {
         return datosPrincipales;
     }
-
     public void setDatosPrincipales(List<String> datosPrincipales) {
         this.datosPrincipales = datosPrincipales;
     }
-
     public Map<String, List<String>> getSeriesTemporalesPorEstacion() {
         return seriesTemporalesPorEstacion;
     }
-
     public void setSeriesTemporalesPorEstacion(Map<String, List<String>> seriesTemporalesPorEstacion) {
         this.seriesTemporalesPorEstacion = seriesTemporalesPorEstacion;
     }
-
     public List<String> getCodigosSismograma() {
         return codigosSismograma;
     }

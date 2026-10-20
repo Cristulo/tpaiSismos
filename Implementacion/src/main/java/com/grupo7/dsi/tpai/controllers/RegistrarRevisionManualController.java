@@ -63,7 +63,7 @@ public class RegistrarRevisionManualController {
         List<EventoSismico> eventoSismicosPendientes = new ArrayList<>();
         // Recorrer la lista de eventos sísmicos y filtrar los que están pendientes de revisión
         for (EventoSismico evento : eventosBDD) {
-            if (evento.estaPendienteRevision()) {
+            if (evento.sosPendienteDeRevision() || evento.sosAutoDetectado()) {
                 eventoSismicosPendientes.add(evento);
             }
         }
@@ -71,18 +71,18 @@ public class RegistrarRevisionManualController {
         eventoSismicosPendientes = filtrarPorFechayHoraDeOcurrencia(eventoSismicosPendientes);
 
         // Formatear datos para la pantalla
-        List<String> raws = new ArrayList<>();
+        List<String> stringsEventoSismicoPendienteRevision = new ArrayList<>();
         for (EventoSismico evento : eventoSismicosPendientes) {
             // antes ponías clasificación en p[3], ahora repetimos origen:
             String raw = String.join(",",
                     evento.getFechaHoraOcurrencia().toString(),
                     evento.getOrigenGeneracion().getNombre(),
                     String.valueOf(evento.getMagnitud().getNumero()),
-                    evento.getOrigenGeneracion().getNombre()    // <-- aquí
+                    evento.getOrigenGeneracion().getNombre()
             );
-            raws.add(raw);
+            stringsEventoSismicoPendienteRevision.add(raw);
         }
-        return raws;
+        return stringsEventoSismicoPendienteRevision;
     }
 
     // Filtra los eventos sísmicos por fecha y hora de ocurrencia
@@ -112,14 +112,7 @@ public class RegistrarRevisionManualController {
 
     // Gestiona el bloqueo del evento sísmico en revisión
     private void bloquearEnRevisionEventoSismico() {
-        // Buscar el estado "Bloqueado en revisión" de la base de datos
-        Estado estadoBloqueado = estadosBDD.stream()
-                .filter(estado -> estado.sosBloqueadoEnRevision())
-                .findFirst()
-                .orElse(null);
-
-        // Cambiar el estado del evento sísmico a "Bloqueado"
-        this.eventoSismicoSeleccionado.bloquearEnRevision(estadoBloqueado);
+        this.eventoSismicoSeleccionado.bloquearEnRevision(null);
 
     }
 
@@ -129,68 +122,40 @@ public class RegistrarRevisionManualController {
             pantalla.mostrarDatosEventoSismicoSeleccionado(null);
             return;
         }
+        DetalleEventoSismicoDTO detalleEventoSismicoDTO = new DetalleEventoSismicoDTO();
+        // Datos principales - cabecera - Alcance - Clasificación - Origen
+        detalleEventoSismicoDTO.setDatosPrincipales(this.eventoSismicoSeleccionado.getAlcanceClasificacionOrigen());
 
-        DetalleEventoSismicoDTO dto = new DetalleEventoSismicoDTO(); // Ayudita del chat para manejar los datos en la pantalla
+        // Series temporales clasificadas por estación sismológica
+        Map<EstacionSismologica, List<SerieTemporal>> seriesBDDxEstacion = clasificarSeriesTemporalesXEstacion();
+        Map<EstacionSismologica, List<SerieTemporal>> seriesEventoSismicoClasificadasEstacionSismologica =
+                eventoSismicoSeleccionado.getSeriesTemporalClasificadasPorEstacionSismologica(seriesBDDxEstacion);
 
-        // Datos principales
-        List<String> alcanceClasificacionOrigen = eventoSismicoSeleccionado.buscarDatosEventoSismicoSeleccionado(); // Caso de uso
-        dto.setDatosPrincipales(alcanceClasificacionOrigen);
+        detalleEventoSismicoDTO.setSeriesTemporalesPorEstacion(
+                formatearSeriesTemporalesPorEstacion(seriesEventoSismicoClasificadasEstacionSismologica));
 
-        // Clasificar series
-        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas = clasificarSeriesTemporales(); // Caso de uso
-
-        // Formatear series temporales por estación para enviar a la pantalla (era mucha logica para diagramar en la secuencia)
-        Map<String, List<String>> seriesPorEstacion = formatearSeriesTemporalesPorEstacion(seriesClasificadas);
-
-        dto.setSeriesTemporalesPorEstacion(seriesPorEstacion);
-
-        // Imagenes del sismograma
-        List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesClasificadas.keySet())); // Caso de uso
-
-        dto.setCodigosSismograma(codigos);
+        // Codigos del sismograma
+        List<String> codigos = generarSismogramaController.generarSismograma(new ArrayList<>(seriesEventoSismicoClasificadasEstacionSismologica.keySet()));
+        detalleEventoSismicoDTO.setCodigosSismograma(codigos);
 
         // Mostrar datos en la pantalla
-        pantalla.mostrarDatosEventoSismicoSeleccionado(dto);
+        pantalla.mostrarDatosEventoSismicoSeleccionado(detalleEventoSismicoDTO);
     }
 
 
-    public Map<EstacionSismologica, List<SerieTemporal>> clasificarSeriesTemporales() {
-
-        Map<EstacionSismologica, List<SerieTemporal>> seriesTemporalesClasificadas = new HashMap<>();
-
-        List<SerieTemporal> seriesEvento = eventoSismicoSeleccionado.getSeriesTemporal();
-
-        // Loop sismografos
-        for (Sismografo sismografo : sismografosBDD) {
-
-            EstacionSismologica estacionSismologica = sismografo.getEstacionSismologica();
-
-            List<SerieTemporal> coincidentes = new ArrayList<>();
-
-            // Loop SerieTemporal del ESseleccionado
-            for (SerieTemporal serieEventoSismicoSeleccionado : seriesEvento) {
-                List<SerieTemporal> seriesTempralesSismografo = sismografo.getSeriesTemporales();
-
-                // Loop
-                for (SerieTemporal serieSismografo : seriesTempralesSismografo) {
-                    // Compara si la serie del evento sismico coincide con la del sismografo
-                    if (serieEventoSismicoSeleccionado.equals(serieSismografo)) {
-                        coincidentes.add(serieSismografo);
-                    }
-                }
-            }
-
-            if (!coincidentes.isEmpty()) {
-                seriesTemporalesClasificadas.put(estacionSismologica, coincidentes);
-            }
+    public Map<EstacionSismologica, List<SerieTemporal>> clasificarSeriesTemporalesXEstacion() {
+        Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadasPorEstacionSismologica = new HashMap<>();
+        for (Sismografo sismografoBdd : sismografosBDD) {
+            // Por cada sismografo, obtener su estación sismológica y las series temporales y guardarlas en seriesClasificadasPorEstacionSismologica
+            EstacionSismologica estacion = sismografoBdd.getEstacionSismologica();
+            List<SerieTemporal> seriesTemporalesDelSismografo = sismografoBdd.getSeriesTemporales();
+            seriesClasificadasPorEstacionSismologica.put(estacion, seriesTemporalesDelSismografo);
         }
-
-        return seriesTemporalesClasificadas;
+        return seriesClasificadasPorEstacionSismologica;
     }
 
     private Map<String, List<String>> formatearSeriesTemporalesPorEstacion(Map<EstacionSismologica, List<SerieTemporal>> seriesClasificadas) {
         Map<String, List<String>> seriesPorEstacion = new HashMap<>();
-
         for (Map.Entry<EstacionSismologica, List<SerieTemporal>> entry : seriesClasificadas.entrySet()) {
             String nombreEstacion = entry.getKey().getNombre();
             List<SerieTemporal> series = entry.getValue();
@@ -294,7 +259,7 @@ public class RegistrarRevisionManualController {
         // Buscar el empleado que está realizando la revisión
         Usuario usuarioDeLaSesion = sesion.getUsuario();
         Empleado empleado = usuarioDeLaSesion.getEmpleado();
-        eventoSismicoSeleccionado.rechazarEventoSismico(estadoRechazado, empleado);
+        eventoSismicoSeleccionado.rechazar(empleado);
         finCu();
     }
 

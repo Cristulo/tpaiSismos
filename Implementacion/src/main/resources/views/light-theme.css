@@ -1,0 +1,193 @@
+/* --- VARIABLES DE COLOR (Basadas en la nueva paleta) --- */
+.root {
+    -fx-base: #4A7C59;
+    -fx-background: #F2F2F2;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-control-inner-background-alt: #F2F2F2;
+    -fx-text-background-color: #2D3748;
+
+    /* Colores de acento */
+    -color-accent-gold: #C0A062;   /* Dorado */
+    -color-accent-gold-hover: #A98D56;
+    -color-accent-red: #f64848;     /* Rojo (para peligro) */
+    -color-accent-green: #48BB78;  /* Verde (para éxito) */
+    -color-border: #BFBFBF;
+}
+
+/* --- FONDO Y TEXTO GENERAL --- */
+.root {
+    -fx-background-color: -fx-background;
+}
+
+.label {
+    -fx-text-fill: -fx-text-background-color;
+}
+
+/* --- ESTILO DE BOTONES --- */
+.button {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: -fx-text-background-color;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 5;
+    -fx-padding: 8 15 8 15;
+}
+.button:hover {
+    -fx-background-color: #F2F2F2;
+}
+
+.button-principal {
+    -fx-background-color: -fx-base;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: -fx-base;
+}
+.button-principal:hover {
+    -fx-background-color: #7a9568;
+}
+
+.button-accion {
+    -fx-background-color: -color-accent-gold;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: -color-accent-gold;
+}
+.button-accion:hover {
+    -fx-background-color: -color-accent-gold-hover;
+}
+
+.button-peligro {
+    -fx-background-color: -color-accent-red;
+    -fx-border-color: -color-accent-red;
+    -fx-text-fill: #FFFFFF;
+}
+.button-peligro:hover {
+    -fx-background-color: #E53E3E;
+}
+
+/* --- ESTILO DE LA TABLA (VISTA PRINCIPAL) --- */
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 8;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F2F2F2;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 2px 0;
+    -fx-padding: 10px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -fx-base;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-background-color;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 10px;
+    -fx-alignment: CENTER;
+}
+
+.table-row-cell {
+    -fx-background-color: -fx-control-inner-background;
+}
+.table-row-cell:hover {
+    -fx-background-color: #F2F2F2;
+}
+.table-row-cell:selected {
+    -fx-background-color: -color-accent-gold;
+}
+
+/* --- PANELES, CONTENEDORES Y FORMULARIOS --- */
+.pane, .anchor-pane, .vbox, .hbox {
+    -fx-background-color: transparent;
+}
+
+.card-pane {
+    -fx-background-color: #efe7e6;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);
+}
+
+/* --- FORMULARIOS (Modificación) --- */
+.text-field {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-text-fill: -fx-text-background-color;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-font-size: 14px;
+}
+.text-field:focused {
+    -fx-border-color: -color-accent-gold;
+    -fx-effect: dropshadow(gaussian, -color-accent-gold, 5, 0.2, 0, 0);
+}
+
+/* --- VISTA DE DETALLE (TitledPane y ListView) --- */
+.titled-pane > .title {
+    -fx-background-color: #36522a;
+    -fx-border-color: -color-border;
+}
+
+/* --- ¡CORRECCIÓN 2: TEXTO DE TÍTULO BLANCO! --- */
+.titled-pane > .title .text {
+    -fx-fill: #FFFFFF; /* Texto blanco sobre fondo verde oscuro */
+}
+
+.titled-pane > .content {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: -color-border;
+}
+
+.list-view {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: -color-border;
+}
+.list-cell {
+    -fx-text-fill: -fx-text-background-color;
+    -fx-background-color: transparent;
+}
+.list-cell:hover {
+    -fx-background-color: #F2F2F2;
+}
+
+/* --- TÍTULOS --- */
+.titulo-principal {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-base;
+}
+.titulo-seccion {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-base;
+}
+
+/* --- BARRAS DE DESPLAZAMIENTO (Scroll Bar) --- */
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: -fx-background;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -color-border;
+    -fx-background-radius: 5;
+}
+.scroll-bar .thumb:hover {
+    -fx-background-color: -fx-text-background-color;
+}

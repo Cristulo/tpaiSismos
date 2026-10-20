@@ -1,13 +1,19 @@
 package com.grupo7.dsi.tpai.models;
 
+import com.grupo7.dsi.tpai.models.interfaces.state.IStateEventoSismico;
+import com.grupo7.dsi.tpai.models.interfaces.state.eventoSismicoStates.*;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @IdClass(EventoSismicoId.class)
+@Getter @Setter
 public class EventoSismico {
 
     @Id
@@ -43,6 +49,9 @@ public class EventoSismico {
             @JoinColumn(name = "estado_ambito", referencedColumnName = "ambito")
     })
     private Estado estadoActual;
+
+    @Transient
+    private IStateEventoSismico estadoActualComportamiento;
 
     @ManyToOne
     @JoinColumn(name = "analista_supervisor_legajo", referencedColumnName = "id")
@@ -82,189 +91,130 @@ public class EventoSismico {
         this.seriesTemporal = seriesTemporal;
     }
 
-    public LocalDateTime getFechaHoraOcurrencia() {
-        return fechaHoraOcurrencia;
+    public void agregarCambioEstadoAEvento(CambioEstado cambioEstadoBloqueadoEnRevision) {
+        this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
     }
 
-    public void setFechaHoraOcurrencia(LocalDateTime fechaHoraOcurrencia) {
-        this.fechaHoraOcurrencia = fechaHoraOcurrencia;
+    @PostLoad
+    private void inicializarEstadoState() {
+        if (estadoActual == null) return;
+        switch (estadoActual.getNombre()) {
+            case "Auto confirmado" -> this.estadoActualComportamiento = new AutoConfirmado();
+            case "Auto detectado" -> this.estadoActualComportamiento = new AutoDetectado();
+            case "Bloqueado en revision" -> this.estadoActualComportamiento = new BloqueadoEnRevision();
+            case "Cerrado" ->  this.estadoActualComportamiento = new Cerrado();
+            case "Confirmado" -> this.estadoActualComportamiento = new Confirmado();
+            case "Derivado a experto" -> this.estadoActualComportamiento = new DerivadoAExperto();
+            case "Pendiente de cierre" -> this.estadoActualComportamiento = new PendienteDeCierre();
+            case "Pendiente revision" -> this.estadoActualComportamiento = new PendienteDeRevision();
+            case "Rechazado" -> this.estadoActualComportamiento = new Rechazado();
+            case "Sin revision" -> this.estadoActualComportamiento = new SinRevision();
+            default -> this.estadoActualComportamiento = null;
+        }
     }
 
-    public OrigenDeGeneracion getOrigenGeneracion() {
-        return origenGeneracion;
-    }
-
-    public void setOrigenGeneracion(OrigenDeGeneracion origenGeneracion) {
-        this.origenGeneracion = origenGeneracion;
-    }
-
-    public LocalDateTime getFechaHoraFin() {
-        return fechaHoraFin;
-    }
-
-    public void setFechaHoraFin(LocalDateTime fechaHoraFin) {
-        this.fechaHoraFin = fechaHoraFin;
-    }
-
-    public String getLatitudEpicentro() {
-        return latitudEpicentro;
-    }
-
-    public void setLatitudEpicentro(String latitudEpicentro) {
-        this.latitudEpicentro = latitudEpicentro;
-    }
-
-    public String getLatitudHipocentro() {
-        return latitudHipocentro;
-    }
-
-    public void setLatitudHipocentro(String latitudHipocentro) {
-        this.latitudHipocentro = latitudHipocentro;
-    }
-
-    public String getLongitudEpicentro() {
-        return longitudEpicentro;
-    }
-
-    public void setLongitudEpicentro(String longitudEpicentro) {
-        this.longitudEpicentro = longitudEpicentro;
-    }
-
-    public String getLongitudHipocentro() {
-        return longitudHipocentro;
-    }
-
-    public void setLongitudHipocentro(String longitudHipocentro) {
-        this.longitudHipocentro = longitudHipocentro;
-    }
-
-    public Float getValorMagnitud() {
-        return valorMagnitud;
-    }
-
-    public void setValorMagnitud(Float valorMagnitud) {
-        this.valorMagnitud = valorMagnitud;
-    }
-
-    public MagnitudRichter getMagnitud() {
-        return magnitud;
-    }
-
-    public void setMagnitud(MagnitudRichter magnitud) {
-        this.magnitud = magnitud;
-    }
-
-    public ClasificacionSismo getClasificacion() {
-        return clasificacion;
-    }
-
-    public void setClasificacion(ClasificacionSismo clasificacion) {
-        this.clasificacion = clasificacion;
-    }
-
-    public AlcanceSismo getAlcanceSismo() {
-        return alcanceSismo;
-    }
-
-    public void setAlcanceSismo(AlcanceSismo alcanceSismo) {
-        this.alcanceSismo = alcanceSismo;
-    }
-
-    public Estado getEstadoActual() {
-        return estadoActual;
-    }
-
-    public void setEstadoActual(Estado estadoActual) {
-        this.estadoActual = estadoActual;
-    }
-
-    public Empleado getAnalistaSupervisor() {
-        return analistaSupervisor;
-    }
-
-    public void setAnalistaSupervisor(Empleado analistaSupervisor) {
-        this.analistaSupervisor = analistaSupervisor;
-    }
-
-    public List<CambioEstado> getCambiosEstado() {
-        return cambiosEstado;
-    }
-
-    public void setCambiosEstado(List<CambioEstado> cambiosEstado) {
-        this.cambiosEstado = cambiosEstado;
-    }
-
-    public List<SerieTemporal> getSeriesTemporal() {
-        return seriesTemporal;
-    }
-
-    public void setSeriesTemporal(List<SerieTemporal> serieTemporal) {
-        this.seriesTemporal = serieTemporal;
-    }
-
-    public Boolean estaPendienteRevision() {
-        if (estadoActual.esAmbito("Evento sismico") && estadoActual.esNombre("Pendiente revision")) {
+    public Boolean sosPendienteDeRevision() {
+        if (this.estadoActual.sosPendienteDeRevision()) {
             return true;
         }
         return false;
     }
 
-    public void bloquearEnRevision(Estado estadoBloqueado) {
-        // Validar que el estadoBloqueado no sea null
-        if (estadoBloqueado == null) {
-            throw new IllegalArgumentException("El estadoBloqueado no puede ser null, revise si hay problemas con la base de datos");
+    public Boolean sosAutoDetectado(){
+        if (this.estadoActual.sosAutoDetectado()) {
+            return true;
         }
-
-        // Setear la fechaHoraFin del cambio de estado actual
-        for (CambioEstado cambioEstado : cambiosEstado) {
-            if (cambioEstado.esEstadoActual()){
-                cambioEstado.setFechaHoraFin(LocalDateTime.now());
-                break;
-            }
-        }
-
-        // Crear nuevo cambio de estado (Patron creador)
-        CambioEstado cambioEstadoBloqueadoEnRevision = new CambioEstado(estadoBloqueado);
-        this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
-
-        // Setear el estado actual del evento sismico
-        this.setEstadoActual(estadoBloqueado);
+        return false;
     }
 
-    // Devuelve una lista de Strings con los datos del Alcance, Clasificación y Origen del evento sísmico seleccionado.
-    public List<String> buscarDatosEventoSismicoSeleccionado() {
+    // Metodos que delegan a los estados desde el evento sismico
 
+    public void bloquearEnRevision(Empleado responsableCambioEstado) {
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.bloquearEnRevision(this, responsableCambioEstado);
+    }
+
+    public void rechazar(Empleado responsableInspeccion) {
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.rechazar(this, responsableInspeccion);
+    }
+
+    public void validarAutoConfirmado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarAutoConfirmado(this, responsableCambioEstado);
+    }
+
+    public void validarAutoDetectado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarAutoDetectado(this, responsableCambioEstado);
+    }
+
+    public void derivarExperto(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.derivarExperto(this, responsableCambioEstado);
+    }
+
+    public void confirmar(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.confirmar(this, responsableCambioEstado);
+    }
+
+    public void validarConfirmado(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.validarConfirmado(this, responsableCambioEstado);
+    }
+
+    public void pendienteDeCierre(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.pendienteDeCierre(this, responsableCambioEstado);
+    }
+
+    public void pendienteDeRevision(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.pendienteDeRevision(this, responsableCambioEstado);
+    }
+
+    public void sinRevision(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.sinRevision(this, responsableCambioEstado);
+    }
+
+    public void cerrar(Empleado responsableCambioEstado){
+        if (estadoActualComportamiento == null)
+            throw new IllegalStateException("No hay estado lógico inicializado.");
+        estadoActualComportamiento.cerrar(this, responsableCambioEstado);
+    }
+
+    public List<String> getAlcanceClasificacionOrigen() {
         List<String> datos = new ArrayList<>();
-
         datos.add("Alcance: " + alcanceSismo.getNombre() + " - " + alcanceSismo.getDescripcion());
-
         datos.add("Clasificación: " + clasificacion.getNombre() + " (" +
                 clasificacion.getKmProfundidadDesde() + "km - " +
                 clasificacion.getKmProfundidadHasta() + "km)");
-
         datos.add("Origen: " + origenGeneracion.getNombre() + " - " + origenGeneracion.getDescripcion());
-
         return datos;
     }
 
-    public void rechazarEventoSismico(Estado estadoRechazado, Empleado responsableInspeccion) {
-        // Validar que el estadoRechazado no sea null
-        if (estadoRechazado == null) {
-            throw new IllegalArgumentException("El estadoRechazado no puede ser null, revise la base de datos");
+    public Map<EstacionSismologica, List<SerieTemporal>> getSeriesTemporalClasificadasPorEstacionSismologica(
+            Map<EstacionSismologica, List<SerieTemporal>> seriesTemporalesPorEstacion) {
+        // Recorrer el map y quitar las series temporales que no pertenezcan a este evento sismico
+        for (EstacionSismologica estacion : seriesTemporalesPorEstacion.keySet()) {
+            List<SerieTemporal> seriesTemporalesBDD = seriesTemporalesPorEstacion.get(estacion);
+            List<SerieTemporal> seriesTemporalesDelEventoSismisco = this.seriesTemporal;
+            // de las series temporales bdd quitar las que no esten en las series temporales del evento sismico
+            seriesTemporalesBDD.removeIf(serieTemporal -> !seriesTemporalesDelEventoSismisco.contains(serieTemporal));
         }
-
-        // Setear fin del estado actual
-        for (CambioEstado cambioEstado : cambiosEstado) {
-            if (cambioEstado.esEstadoActual()){
-                cambioEstado.setFechaHoraFin(LocalDateTime.now());
-                break;
-            }
-        }
-
-        // Crear nuevo cambio de estado
-        CambioEstado cambioEstadoRechazado = new CambioEstado(estadoRechazado);
-        cambioEstadoRechazado.setResponsableInspeccion(responsableInspeccion);
-        this.cambiosEstado.add(cambioEstadoRechazado);
-        this.estadoActual = estadoRechazado;
+        return seriesTemporalesPorEstacion;
     }
+
 }
